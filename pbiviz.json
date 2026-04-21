@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "oSMaps",
+        "displayName": "OS Power BI Map Visual",
+        "guid": "oSMaps455D1584AE894DF6B26F87D8DED2142B",
+        "visualClassName": "OSPowerBIVisual",
+        "version": "1.0.0",
+        "description": "OS PowerBI Custom Visual",
+        "supportUrl": "https://github.com/OrdnanceSurvey/os-powerbi-map",
+        "gitHubUrl": "https://github.com/OrdnanceSurvey/os-powerbi-map"
+    },
+    "apiVersion": "5.3.0",
+    "author": {
+        "name": "Ordnance Survey",
+        "email": "https://github.com/OrdnanceSurvey/os-powerbi-map/issues"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "0.0.0.1"
+}

@@ -1,0 +1,32 @@
+@startuml
+class OSMapsDataviewConverter {
+    +convert(options: VisualUpdateOptions): OSMapsParsedTable
+    -parse_to_object(options: VisualUpdateOptions): OSMapsParsedTable
+}
+
+class OSMapsGeoJSONBuilder {
+    +buildPointSet(viewModel: OSMapsParsedTable, cartoSettings: LayerCartoSettings, signal: AbortSignal): Promise<{featurecoll: OSMapsCartographicFeatureCollection, isAborted:boolean, logRecords:LogRecord[]}>
+    +buildGeometriedFeatures(viewmodel: OSMapsParsedTable, settings: ParsedCardSettingsWrapper, signal: AbortSignal, updateid: string): Promise<{featurecoll: OSMapsCartographicFeatureCollection, isAborted:boolean, logRecords: LogRecord[]}>
+    -initializePolygonGeocoder(): Promise<void>
+    -initializePointGeocoder(): void
+    -buildGeocodeLogRecord(geocodeMetrics: GeocodeMetrics): LogRecord
+}
+
+class PointGeocoder {
+    +geocode(value: string): Promise<any>
+}
+
+class PolygonGeocoder {
+    +geocode(value: string): Promise<any>
+}
+
+class GeocodeMetrics {
+    +addResult(result: any): void
+    +getSummary(): any
+}
+
+OSMapsGeoJSONBuilder --> PointGeocoder
+OSMapsGeoJSONBuilder --> PolygonGeocoder
+OSMapsGeoJSONBuilder --> GeocodeMetrics
+OSMapsDataviewConverter --> OSMapsGeoJSONBuilder
+@enduml

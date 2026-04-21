@@ -1,0 +1,61 @@
+@startuml
+interface NumericScaler {
+    +getProportionalValue(val: number): number
+    +getScaledValue(val: number): number
+    +getDefaultValue(): number
+    +updateOutputRange(newRange: [number, number]): void
+    +inputMinMax: [number, number]
+    +outputMinMax: [number, number]
+    +renderableMinMax: [number, number]
+}
+
+interface IterativeScaler {
+    +pushValue(val: number): void
+}
+
+interface ColourScaler {
+    +getColourForValue(val: number|string): string
+    +getDefaultColour(): string
+    +updateOutputColourRamp(newRange: [string, string]): void
+    +hasNullValues: boolean
+    +hasNonNullValues: boolean
+    +hasColourOverrideValues: boolean
+}
+
+interface LegendGenerator {
+    +getLegendEntriesDiv(namestring: string, opacity?: number, withBorder?: boolean): HTMLElement
+}
+
+class NumericLinearScaler implements NumericScaler, IterativeScaler {
+    +getProportionalValue(val: number): number
+    +getScaledValue(val: number): number
+    +getDefaultValue(): number
+    +updateOutputRange(newRange: [number, number]): void
+    +pushValue(val: number): void
+}
+
+class NumericPercentClipScaler extends NumericLinearScaler implements NumericScaler, IterativeScaler {
+    +updateClipPercentage(percentage: number): void
+}
+
+class CategoricalScaler extends NumericPercentClipScaler {
+    +pushCategory(val: string|number): boolean
+    +n_classes: number
+    +has_AllOtherValues: boolean
+    +all_categories: string[]
+    +getValueForString(stringValue: string): number
+}
+
+class PointSymbolSimulator implements LegendGenerator {
+    +getPointSymbol(colourValue: string | number, sizeValue: number)
+    +setColour(colour: string)
+    +getLegendEntriesDiv(namestring: string): HTMLElement
+}
+
+NumericLinearScaler ..|> NumericScaler
+NumericPercentClipScaler ..|> NumericScaler
+NumericPercentClipScaler ..|> IterativeScaler
+NumericPercentClipScaler --|> NumericLinearScaler
+CategoricalScaler --|> NumericPercentClipScaler
+PointSymbolSimulator ..|> LegendGenerator
+@enduml

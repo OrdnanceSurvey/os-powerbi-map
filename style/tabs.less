@@ -1,0 +1,170 @@
+// tabs.less
+
+@import "os-gill-font.less";
+
+.tabset {
+  & > input[type="radio"] {
+    position: absolute;
+    left: -200vw;
+  }
+
+  & label {
+    font-family: 'Hanken Grotesk Variable', sans-serif;
+    position: relative;
+    display: inline-flex;
+    padding: 2px 15px;
+    background: #ffffffb5;
+    border-radius: 5px;
+    cursor: pointer;
+    .box-shadow
+  }
+
+  &__tab-icon {
+    display: none;
+  }
+
+  &__tab-panels {
+    height: 60vh;
+
+    & p {
+      line-height: 1.5;
+    }
+  }
+
+  &__panel {
+    display: none;
+    height: 100%;
+    justify-content: space-evenly;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 30px;
+    border-radius: 0 0 5px 5px;
+    background: #ffffffb5;
+    .box-shadow;
+  }
+
+  // display specific panels based on which input is checked
+  & > input:first-child:checked ~ &__tab-panels > &__panel:first-child,
+  & > input:nth-child(3):checked ~ &__tab-panels > &__panel:nth-child(2),
+  & > input:nth-child(5):checked ~ &__tab-panels > &__panel:nth-child(3),
+  & > input:nth-child(7):checked ~ &__tab-panels > &__panel:nth-child(4),
+  & > input:nth-child(9):checked ~ &__tab-panels > &__panel:nth-child(5),
+  & > input:nth-child(11):checked ~ &__tab-panels > &__panel:nth-child(6) {
+    display: flex;
+  }
+
+  &__images {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+  }
+
+  &__api-image {
+    flex-wrap: wrap;
+    margin: 0.5rem;
+    height: 48px !important;
+    border-radius: 5px;
+    .box-shadow;
+  }
+
+  &__data-image {
+    height: 150px !important;
+    border-radius: 5px;
+    margin: 0.5rem;
+    .box-shadow;
+  }
+
+  &__custom-image {
+    width: 65%;
+    align-self: center;
+    .box-shadow
+  }
+
+  & > label::after {
+    content: "";
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 4px;
+    background: #c7c5de;
+  }
+
+  & input:focus-visible + label {
+    outline: 2px solid #453c90;
+    border-radius: 5px;
+  }
+
+  & > label:hover,
+  & > input:focus + label,
+  & > input:checked + label {
+    color: #453c90;
+  }
+
+  & > label:hover::after,
+  & > input:focus + label::after,
+  & > input:checked + label::after {
+    background: #453c90;
+  }
+
+  & > input:checked + label {
+    border-color: #c7c5de;
+    border-bottom: 1px solid #fff;
+    margin-bottom: -1px;
+  }
+}
+
+// when screen width gets smaller, make tabs switch from text labels to icons
+@media screen and (max-width: 700px) {
+  .tabset {
+    &__tab-icon {
+      display: block;
+    }
+
+    & > label p {
+      display: none;
+    }
+
+    & > label {
+      padding: 10px;
+    }
+  }
+}
+
+@media screen and (min-width: 700px) {
+  .material-symbols-rounded.tabset__tab-icon {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 950px) {
+  .tabset {
+    &__custom-image {
+      width: 95%;
+    }
+  }
+}
+
+@media screen and (max-width: 650px) {
+  /* when the screen gets smaller */
+
+  .tabset {
+    &__apikey-button {
+    font-size: 0.8em;
+    }
+
+    &__panel {
+    padding: 20px;
+    }
+
+    &__custom-image {
+    width: 100%;
+    }
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .tabset__panel {
+    padding: 10px;
+}
+}

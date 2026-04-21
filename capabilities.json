@@ -1,0 +1,506 @@
+{
+    "dataRoles": [
+        {
+            "name": "point_geocodes",
+            "displayName": "Points: Postcodes or UPRNs",
+            "description": "Postcodes or UPRNs to geocode and display as points. Exclusive with X/Y coordinate buckets.",
+            "kind": "Grouping",
+            "preferredTypes": [{"geography": {"postalCode": true}},{"integer": true}, {"numeric": true}]
+        },
+        {
+            "name": "easting",
+            "displayName": "Points: X (Easting or Longitude)",
+            "description": "X coordinates of geo-located point data (easting in BNG, or longitude in decimal degrees). Exclusive with geocodes bucket.",
+            "kind": "Grouping",
+            "requiredTypes": [
+                {"numeric": true},
+                {"integer": true},
+                {"geography": {"longitude": true}}
+            ]
+        },
+        {
+            "name": "northing",
+            "displayName": "Points: Y (Northing or Latitude)",
+            "description": "Y coordinate of geo-located point data (northing in BNG, or latitude in decimal degrees). Exclusive with geocodes bucket.",
+            "kind": "Grouping",
+            "requiredTypes": [
+                {"numeric": true},
+                {"integer": true},
+                {"geography": {"latitude": true}}
+            ]
+        },
+        {
+            "name": "point_colour",
+            "displayName": "Points: Colour",
+            "description": "Values to colour point markers. Can be RGB strings such as '#453C90', or numeric, or text, or not provided. If numeric, the colour will be scaled betwen the values set on the formatting / settings pane. If text the values will be displayed using a different colour for each unique value up to a maximum of 12 unique values.",
+            "kind": "GroupingOrMeasure",
+            "preferredTypes": [{"text": true}, {"numeric": true}]
+        },
+        {
+            "name": "point_size",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Points: Size",
+            "description": "Numeric values to control marker size (radius). Will be scaled to the maximum / minimum values specified in the formatting / settings pane.",
+            "requiredTypes": [
+              {
+                "numeric": true
+              },
+              {
+                "integer": true
+              }
+            ]
+        },
+        {
+            "name": "point_popup_text",
+            "displayName": "Points: Pop-ups",
+            "description": "Field(s) containing information to show in popups on marker points layer. You can add multiple fields, and reorder the fields to change order in the popups.",
+            "kind": "GroupingOrMeasure",
+            "preferredTypes": [
+                {"numeric": true},
+                {"integer": true},
+                {"text": true}
+            ]
+        },
+        {
+            "name": "feature_geometry",
+            "displayName": "Features Layer: WKT or GeoJSON Geometries",
+            "description": "WKT or GeoJSON geometries to add to the map from your Power BI data model. These can be WKT geometries, standalone GeoJSON geometries, or full GeoJSON features. If they are features then their properties will be added to the popups unless fields from the data model are chosen below. Objects must have a CRS defined if they are not WGS84/lat-lon coordinates.",
+            "kind": "Grouping",
+            "preferredTypes": [{"text": true}]
+        },
+        {
+            "name": "gss_code",
+            "displayName": "Features Layer: GSS codes for geocoding ONS boundaries",
+            "description": "GSS polygon identifiers for geocoding data to polygons for choropleth mapping, for example LSOA or Ward boundaries. See the documentation for a list of supported code types.",
+            "kind": "Grouping",
+            "preferredTypes": [{"text": true}]
+        },
+        {
+            "name": "geojson_reference",
+            "displayName": "Features Layer: Linking identifier to match in uploaded geometries",
+            "description": "Identifiers to match to features in the uploaded spatial data (upload data on the Format Visual tab and choose the column in the dropdown there which matches the data you add to this field)",
+            "kind": "Grouping",
+            "preferredTypes": [{"text": true}]
+        },
+        {
+            "name": "polygon_colour",
+            "displayName": "Features Layer: Colour",
+            "description": "Values to colour features in the features layer. Can be RGB strings such as '#453C90', or numeric, or text, or not provided. If numeric, the colour will be scaled betwen the values set on the formatting / settings pane. If text the values will be displayed using a different colour for each unique value up to a maximum of 12 unique values.",
+            "kind": "GroupingOrMeasure",
+            "preferredTypes": [{"text": true}, {"numeric": true}]
+        },
+        {
+            "name": "polygon_popup_text",
+            "displayName": "Features Layer: Pop-ups",
+            "description": "Field(s) containing text to show in popups on WKT/GeoJSON/GSS features. If not set then geojson properties will be used if present. You can add multiple fields, and reorder the fields to change order in the popups." ,
+            "kind": "GroupingOrMeasure" ,
+            "preferredTypes": [{"text": true}]
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "table":{
+                "rows": {
+                    "select": [
+                        {
+                            "for": {"in": "easting"}
+                        },
+                        {
+                            "for": {"in": "northing"}
+                        },
+                        {
+                            "for": {"in": "point_geocodes"}
+                        },
+                        {
+                            "for": {"in": "point_colour"}
+                        },
+                        {
+                            "for": {"in": "point_size"}
+                        },
+                        {
+                            "for": {"in": "point_popup_text"}
+                        },
+                        {
+                            "for": {"in": "feature_geometry"}
+                        },
+                        {
+                            "for": {"in": "gss_code"}
+                        },
+                        {
+                            "for": {"in": "geojson_reference"}
+                        },
+                        {
+                            "for": {"in" : "polygon_colour"}
+                        },
+                        {
+                            "for": {"in": "polygon_popup_text"}
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 30000
+                        }
+                    }
+                },
+                "rowCount": {"supported": {"max": 1000000}}
+            },
+            "conditions": [
+                {
+                    "easting": { "min": 0, "max": 1 },
+                    "northing": { "min": 0, "max": 1 },
+                    "point_geocodes": { "max": 0 },
+                    "feature_geometry": { "min": 0, "max": 1 },
+                    "gss_code": { "max": 0 },
+                    "geojson_reference": {"max": 0},
+                    "point_colour": { "max": 1 },
+                    "point_size": { "max": 1 },
+                    "point_popup_text": { "max": 10 },
+                    "polygon_colour": { "max": 1 },
+                    "polygon_popup_text": { "max": 10 }
+                },
+                {
+                    "easting": { "min": 0, "max": 1 },
+                    "northing": { "min": 0, "max": 1 },
+                    "point_geocodes": { "max": 0 },
+                    "feature_geometry": { "max": 0 },
+                    "gss_code": { "min": 0, "max": 1 },
+                    "geojson_reference": {"max": 0},
+                    "point_colour": { "max": 1 },
+                    "point_size": { "max": 1 },
+                    "point_popup_text": { "max": 10 },
+                    "polygon_colour": { "max": 1 },
+                    "polygon_popup_text": { "max": 10 }
+                },
+                {
+                    "easting": { "min": 0, "max": 1 },
+                    "northing": { "min": 0, "max": 1 },
+                    "point_geocodes": { "max": 0 },
+                    "feature_geometry": { "max": 0 },
+                    "gss_code": { "max": 0 },
+                    "geojson_reference": {"min": 0,"max": 1},
+                    "point_colour": { "max": 1 },
+                    "point_size": { "max": 1 },
+                    "point_popup_text": { "max": 10 },
+                    "polygon_colour": { "max": 1 },
+                    "polygon_popup_text": { "max": 10 }
+                },
+                {
+                    "easting": { "max": 0 },
+                    "northing": { "max": 0 },
+                    "point_geocodes": { "min": 0, "max": 1 },
+                    "feature_geometry": { "min": 0, "max": 1 },
+                    "gss_code": { "max": 0 },
+                    "geojson_reference": {"max": 0},
+                    "point_colour": { "max": 1 },
+                    "point_size": { "max": 1 },
+                    "point_popup_text": { "max": 10 },
+                    "polygon_colour": { "max": 1 },
+                    "polygon_popup_text": { "max": 10 }
+                },
+                {
+                    "easting": { "max": 0 },
+                    "northing": { "max": 0 },
+                    "point_geocodes": { "min": 0, "max": 1 },
+                    "feature_geometry": { "max": 0 },
+                    "gss_code": { "min": 0, "max": 1 },
+                    "geojson_reference": {"max": 0},
+                    "point_colour": { "max": 1 },
+                    "point_size": { "max": 1 },
+                    "point_popup_text": { "max": 10 },
+                    "polygon_colour": { "max": 1 },
+                    "polygon_popup_text": { "max": 10 }
+                },
+                {
+                    "easting": { "max": 0 },
+                    "northing": { "max": 0 },
+                    "point_geocodes": { "min": 0, "max": 1 },
+                    "feature_geometry": { "max": 0 },
+                    "gss_code": { "max": 0 },
+                    "geojson_reference": {"min": 0, "max": 1},
+                    "point_colour": { "max": 1 },
+                    "point_size": { "max": 1 },
+                    "point_popup_text": { "max": 10 },
+                    "polygon_colour": { "max": 1 },
+                    "polygon_popup_text": { "max": 10 }
+                }
+            ]
+        }
+    ],
+    "objects": {
+        "mapSettings":{
+            "properties": {
+                "apiKey":{
+                    "type": {
+                        "text": true
+                    }
+                },
+                "usePremiumData":{
+                    "type":{
+                        "bool": true
+                    }
+                },
+                "useOSGB":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "zoomPanSelect":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "showLegend":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "autoZoom":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "showDebugMessages":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "useMoreDetailedGeom":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "hideDefaultPopupFields":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "selectionColour" : {
+                    "displayName": "Colour of selected features",
+                    "type": {"fill": {"solid": {"color":true}}}
+                },
+                "alwaysShowIdentifier":{
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "stylingSettings":{
+            "displayName": "Marker points layer style",
+            "properties": {
+                "markerPointColourMax": {
+                    "type": {"fill": {"solid": {"color":true}}}
+                },
+                "markerPointColourMin": {
+                    "type": {"fill": {"solid": {"color":true}}}
+                },
+                "markerPointPctClipColour": {
+                    "displayName": "Clip top/bottom % of values before colour scaling",
+                    "type": {"numeric": true}
+                },
+                "markerPointPctClipSize": {
+                    "displayName": "Clip top/bottom % of values before size scaling",
+                    "type": {"numeric": true}
+                },
+                "pointOpacity": {
+                    "displayName": "Point opacity",
+                    "type": {"numeric": true}
+                },
+                "defaultPointCategoricalColours":{
+                    "displayName": "Default colours for categorical data",
+                    "type": {"bool": true}
+                },
+                "markerPointSizeMax":{
+                    "displayName": "Largest point size",
+                    "type": {"integer": true}
+                },
+                "markerPointSizeMin":{
+                    "displayName": "Smallest point size",
+                    "type": {"integer": true}
+                },
+                "markerLineThickness":{
+                    "displayName": "Point boundary thickness",
+                    "type": {"numeric": true}
+                },
+                "featureColourMax": {
+                    "type": {"fill": {"solid": {"color":true}}}
+                },
+                "featureColourMin": {
+                    "type": {"fill": {"solid": {"color":true}}}
+                },
+                "featurePctClip": {
+                    "displayName": "Clip top/bottom % of values before scaling",
+                    "type": {"numeric": true}
+                },
+                "featureOpacity": {
+                    "displayName": "Feature opacity",
+                    "type": {"numeric": true}
+                },
+                "defaultFeatureCategoricalColours":{
+                    "displayName": "Default colours for categorical data",
+                    "type": {"bool": true}
+                },
+                "featurePointSizePctClip": {
+                    "displayName": "Clip top/bottom % of values before scaling",
+                    "type": {"numeric": true}
+                },
+                "featurePointSizeMax":{
+                    "displayName": "Largest point size",
+                    "type": {"integer": true}
+                },
+                "featurePointSizeMin":{
+                    "displayName": "Smallest point size",
+                    "type": {"integer": true}
+                },
+                "featureLineThickness":{
+                    "displayName": "Line / polygon boundary thickness",
+                    "type": {"numeric": true}
+                },
+                "refLineStyle":{
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "refBorderWeight":{
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "refFillColour":{
+                    "type": {"fill": {"solid": {"color":true}}}
+                },
+                "refOpacity": {
+                    "type": {"numeric": true}
+                },
+                "unmatchedLineStyle":{
+                    "type": {
+                        "enumeration": []
+                    }
+                },
+                "unmatchedBorderWeight":{
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "unmatchedFillColour":{
+                    "type": {"fill": {"solid": {"color":true}}}
+                },
+                "unmatchedOpacity": {
+                    "type": {"numeric": true}
+                },
+                "unmatchedPointSize":{
+                    "type": {"numeric": true}
+                }
+            }
+        },
+        "referenceLayerSettings":{
+            "displayName": "GSS blah",
+            "properties": {
+                "refOverlayCodes":{
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "userDataSettings": {
+            "displayName": "Upload geospatial data",
+            "properties": {
+                "uploadDataToggle": {
+                    "displayName": "Upload geospatial data",
+                    "type": {"bool": true}
+                },
+                "fileName":{
+                    "displayName": "Uploaded filename",
+                    "type":{"text": true}
+                },
+                "identifierField": {
+                    "displayName": "Identifier",
+                    "type": {
+                            "enumeration": [
+                            ]
+                        }
+                },  
+                "dummyUpdateTrigger": {
+                    "displayName": "Trigger",
+                    "type": { "numeric": true }
+                },
+                "showUnmatchedLocalFeatures":{
+                    "type": {"bool": true}
+                },
+                "includeNativeProperties":{
+                    "type": {"bool": true}
+                }
+            }
+        },
+        "osmapsPersistedSettings":{
+            "displayName": "Persisted data (do not edit)",
+            "properties":{
+                "geocodeResults":{
+                    "displayName": "Cached geocode results",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "polygonGeocodeResults":{
+                    "displayName": "Cached poly geocode results",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "polygonGeocodeBounds":{
+                    "displayName": "Cached poly geocode bounds",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "layername":{
+                    "displayName": "In-use base layer",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "mapExtent": {
+                    "displayName": "map extent",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "usingDetailedGeom":{
+                    "type": {"text": true}
+                },
+                "uploadedGeojson":{
+                    "type": {"text": true}
+                },
+                "uploadedGeojson_idfield":{
+                    "type": {"text": true}
+                },
+                "lastKeyStatus":{
+                    "type": {"text": true}
+                },
+                "expectingData":{
+                    "type": {"bool": true}
+                }
+            }
+        }
+
+    },
+    "privileges": [
+        {
+            "name": "WebAccess",
+            "essential": true,
+            "parameters": [ "https://*.os.uk", "https://gdisquadstorage.blob.core.windows.net", "https://localhost:8080",
+            "https://gdisquadstorage.file.core.windows.net", "https://os-powerbi-api.azurewebsites.net", 
+            "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://*.ordsvy.gov.uk:6443", 
+            "https://epsg.io",
+            "https://*.arcgis.com", "http://localhost:20000", "https://*.in.applicationinsights.azure.com/v2/track","https://js.monitor.azure.com", "https://www.ordnancesurvey.co.uk/*", "https://forms.office.com/e/*", "https://forms.cloud.microsoft/e/*", "https://localhost:8080", "https://api.github.com/repos/OrdnanceSurvey/os-powerbi-map/releases/latest"
+            ]
+        },
+        {
+            "name": "LocalStorage",
+            "essential": true
+        }
+    ],
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true
+}

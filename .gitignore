@@ -1,0 +1,14 @@
+.DS_Store
+node_modules
+dist
+.tmp
+wtr_fts_waterpoint.csv
+wtr_fts_waterpoint_lonlat.csv
+package-lock.json
+temp.ipynb
+test_data
+webpack.statistics.dev.html
+webpack.statistics.prod.html
+original_pngs
+.OS-Platform-Metadata
+.vscode

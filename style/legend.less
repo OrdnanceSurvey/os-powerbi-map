@@ -1,0 +1,168 @@
+// legend.less
+
+.legend {
+  .box-shadow;
+  background: white;
+  border-radius: 5px;
+  color: black;
+  z-index: 9001;
+  position: absolute;
+  bottom: 38px;
+  right: 12px;
+  margin: 8px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: fit-content;
+  max-height: max-content;
+
+  // button to collapse legend
+  &__legend-collapse {
+    cursor: pointer;
+    background: #fff;
+    border: none;
+    display: none;
+    align-items: center;
+    padding: 0;
+    border-radius: 5px;
+
+    & p {
+      display: none;
+    }
+  }
+
+  // what the button collapses
+  &__legend-collapse-container {
+    z-index: 9001;
+    display: flex;
+    border-radius: 5px;
+    align-items: flex-start;
+  }
+
+  &--legend-closed {
+    padding: 5px;
+    display: flex;
+    border-radius: 5px;
+
+    & span {
+      transform: scaleX(-1);
+    }
+
+    & p {
+      display: block;
+      padding-right: 5px;
+      font-weight: bold;
+      font-size: 1em;
+    }
+  }
+
+  // one of these for each of the two powerbi layers, if visible
+  &__legend-item-container {
+    height: 100%;
+    min-width: 100px;
+    max-width: 200px;
+    padding: 15px;
+    padding-left: 0;
+    display: grid;
+  }
+
+  &__legend-item {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    white-space: nowrap;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    &__title {
+      text-align: center;
+      font-size: 12px;
+      color: black;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-weight: bold;
+      padding-bottom: 0.6rem;
+      line-height: 1.2rem;
+    }
+  }
+
+  &__category-legend {
+    display: grid;
+    grid-template-columns: 25px minmax(0, 3fr);
+    grid-auto-rows: 17px;
+    row-gap: 5px;
+    column-gap: 8px;
+    font-size: 12px;
+
+    &__text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      align-content: center;
+    }
+
+    &__patches {
+      border-radius: 0%;
+    }
+  }
+
+  &__points-legend &__category-legend__patches {
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+  }
+
+  &__point-size-legend {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-auto-rows: auto;
+    gap: 20px;
+    margin: 10px;
+    width: 100%;
+    font-size: 12px;
+
+    & > :nth-child(2n + 1) {
+      justify-self: center;
+      align-self: center;
+    }
+
+    &__points {
+      border-radius: 50%;
+    }
+  }
+
+  // a css grid with 3 cols for the ramp, tickmarks, & tick labels
+  &__ramp-legend {
+    display: grid;
+    grid-template-columns: minmax(auto, 25px) minmax(auto, 4px) minmax(
+        auto,
+        3fr
+      );
+    height: 100%;
+    gap: 3px;
+    padding-top: 5px;
+
+    // centre column, the tickmarks
+    &__ticks {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      // counteract the gap property to make tickmark touch ramp
+      margin-left: -3px;
+
+      & div {
+        border-top: 1px solid #777;
+      }
+    }
+
+    // rightmost column, the tick labels
+    &__labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 12px;
+      gap: 20px;
+      padding-left: 10px;
+      text-overflow: ellipsis;
+    }
+  }
+}

@@ -1,0 +1,162 @@
+// visual.less
+@import "os-gill-font.less";
+@import "landing-page.less";
+@import "tabs.less";
+@import "table.less";
+@import "faqs-accordian.less";
+@import "notification.less";
+@import "osmaps-toast.less";
+@import "map.less";
+@import "map-icons.less";
+@import "legend.less";
+@import "user-data-upload.less";
+
+// mixins
+.box-shadow {
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.148);
+}
+
+.button {
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 1em;
+  align-items: center;
+  border: solid 2px #ff5f00;
+  color: #ff5f00;
+  padding: 10px 15px;
+  border-radius: 5px;
+  background: #fff;
+  .box-shadow;
+  transition: box-shadow 0.25s ease !important;
+}
+
+.gap {
+  gap: 1.5rem;
+}
+
+.gap-small {
+  gap: 0.5rem;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+
+// Auth dialogue box
+.not-authorised {
+  font-family: "OS Gill Regular", sans-serif;
+  display: flex;
+}
+
+.dialog-sandbox {
+  padding: 0;
+}
+
+// any toggle button
+.toggle {
+  border-radius: 50%;
+  border: none;
+  margin: 0;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  .box-shadow;
+}
+
+.close-button {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  width: 1.7rem;
+  height: 1.7rem;
+  cursor: pointer;
+  border: none;
+  background: #fff;
+  border-radius: 50%;
+
+  & span {
+    font-size: 18px;
+  }
+}
+
+// text
+h1 {
+  text-align: left;
+  margin: 0;
+  font-size: 1.7em;
+}
+
+h2 {
+  font-size: 1.1em;
+  margin-bottom: 0;
+  font-weight: normal;
+}
+
+h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2em;
+}
+
+p {
+  margin: 0.5rem 0;
+  font-size: 1em;
+}
+
+em {
+  color:#453c90;
+  text-decoration: underline;
+  font-style: normal;
+  cursor: pointer;
+}
+
+.text-centred {
+  text-align: center;
+}
+
+// Scrollbar
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  // background: #F5F5F580;
+  border-radius: 6px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #c7c5de;
+  border-radius: 6px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #453c90;
+}
+
+@media screen and (max-width: 800px) {
+  /* when the screen gets smaller */
+  h1 {
+    font-size: 1.3em;
+  }
+
+  p {
+    font-size: 0.9em;
+  }
+}
+
+@media screen and (max-width: 320px) and (max-height: 320px) {
+  h1 {
+    font-size: 1.1em;
+  }
+}

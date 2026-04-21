@@ -1,0 +1,154 @@
+// Notification popup
+
+@import "os-gill-font.less";
+
+// Notification button with red dot
+.notification-button {
+  bottom: 92px;
+  left: 9px;
+  width: 2.1rem;
+  height: 2.1rem;
+  z-index: 9001;
+  padding: 0;
+  cursor: pointer;
+
+  &::after {
+    .box-shadow;
+    content: "";
+    position: absolute;
+    top: -4px;
+    right: -2px;
+    width: 13px;
+    height: 13px;
+    background-color: red;
+    border-radius: 50%;
+    opacity: 0; /* Start hidden */
+    transform: scale(0); /* Start scaled down */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+  }
+
+  &--has-notification::after {
+    opacity: 1; /* Fade in */
+    transform: scale(1); /* Scale up */
+  }
+}
+
+// Popup itself
+.notification-popup {
+  font-family: 'Hanken Grotesk Variable', sans-serif;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  position: fixed;
+  background: #0000003d;
+  display: none;
+  z-index: 9999;
+  overflow: hidden;
+  cursor: auto;
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 60%;
+    width: 60%;
+    border-radius: 5px;
+    cursor: auto;
+    background: #f5f5f5;
+    .box-shadow;
+  }
+
+  &__close {
+    float: right;
+    cursor: pointer;
+    font-size: 1.3em !important;
+  }
+
+  &__banner {
+    width: -webkit-fill-available;
+    margin: 15px 15px 10px 15px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    font-size: 1em;
+
+    & h2 {
+      margin-top: 0;
+    }
+  }
+
+  &__intro {
+    padding: 15px;
+    margin: 0;
+    font-size: 1em;
+  }
+
+  &__content {
+    width: 100%;
+    overflow: auto;
+    padding: 0 15px 15px 15px;
+
+    & p {
+      overflow-wrap: anywhere;
+      background: #d3d3d317;
+      font-size: 1em;
+      padding: 10px;
+      border-radius: 5px;
+      .box-shadow;
+    }
+  }
+
+  &__section {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    
+    & span {
+    margin-right: 10px;
+  }
+  
+  & hr {
+    flex-grow: 1;
+    border: none;
+    border-top: 2.5px solid #ccc;
+  }
+  }
+
+  &__no-new {
+        background: hsl(22deg 100% 50% / 17%);
+    padding: 0.5rem;
+    border-radius: 5px;
+    width: fit-content;
+    color: #ff5e00;
+  }
+  
+  
+
+  &__notification {
+    display: flex;
+    align-items: center;
+
+    & p {
+      cursor: text;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    & span {
+      padding-right: 10px;
+      font-size: 1.3em;
+      color: #ff5e00;
+    }
+  }
+}
+
+@media screen and (max-width: 560px) {
+  /* style changes when the screen gets smaller */
+  .notification-popup__container {
+    height: 80%;
+    width: 85%;
+  }
+}

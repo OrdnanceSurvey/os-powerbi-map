@@ -1,0 +1,118 @@
+// faqs-accordian.less
+.accordion {
+  font-family:'Hanken Grotesk Variable', sans-serif;
+  padding: 0 20px 20px 20px;
+  background: #ffffffe3;
+  border-radius: 5px;
+  margin: 0;
+  .box-shadow;
+
+  &__dropdown {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    padding-bottom: 4px;
+    padding-top: 8px;
+    border-top: 1px dotted #dce7eb;
+
+    & input[type="checkbox"] {
+      position: absolute;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+    }
+
+    // expands answer when clicked
+    & input[type="checkbox"]:checked ~ .accordion__answer {
+      margin-top: 0;
+      max-height: 0;
+      opacity: 0;
+      transform: translate(0, 50%);
+    }
+
+    // rotates arrow when clicked
+    & input[type="checkbox"]:checked ~ .accordion__arrow:before {
+      transform: translate(2px, 0) rotate(45deg);
+    }
+
+    & input[type="checkbox"]:checked ~ .accordion__arrow:after {
+      transform: translate(-2px, 0) rotate(-45deg);
+    }
+  }
+
+  &__arrow {
+    position: absolute;
+    transform: translate(-6px, 0);
+    margin-top: 16px;
+    right: 0;
+
+    // makes the actual arrow
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      background-color: black;
+      width: 3px;
+      height: 9px;
+    }
+
+    &:before {
+      transform: translate(-2px, 0) rotate(45deg);
+    }
+
+    &:after {
+      transform: translate(2px, 0) rotate(-45deg);
+    }
+  }
+
+  &__question {
+    margin: 10px 10px 10px 0;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    font-family: 'Hanken Grotesk Variable', sans-serif;
+    font-size: 1.5em;
+    font-weight: normal;
+  }
+
+  &__answer {
+    position: relative;
+    overflow: hidden;
+    transform: translate(0, 0);
+    font-size: 1.3em;
+
+    &--center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    // accordion specific table
+    & caption {
+      display: table-caption;
+      caption-side: top;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    & th:first-child {
+      border-top-left-radius: 5px;
+    }
+
+    & th:last-child {
+      border-top-right-radius: 5px;
+    }
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .accordion {
+    padding: 0 10px 0 10px;
+  }
+}

@@ -1,0 +1,99 @@
+.table-container {
+  align-self: center;
+  width: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 0.5em;
+  max-width: 800px;
+  font-size: 1em;
+  background: #fff;
+  border: 1px solid #e4e3e3;
+
+  & caption {
+    display: none;
+  }
+
+  // table header
+  & th {
+    background: #453c90;
+    color: white;
+    padding: 0.5em;
+    border: 1px solid #453c90;
+    text-align: center;
+  }
+
+  & td {
+    padding: 0.5em;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+
+  &--first-col {
+    background-color: #d8d8e9;
+  }
+
+  &--flex-row {
+    text-align: left;
+  }
+}
+
+.data-type-title td {
+  background: #d8d8e9;
+  font-weight: bold;
+  text-align: center;
+  padding: 0.5em;
+}
+
+@media only screen and (max-width: 650px) {
+  .table-container {
+    background: none;
+    margin: 0;
+
+    & th {
+      display: none;
+    }
+
+    & tr.card {
+      display: block;
+      margin: 0.5em;
+      background: #fff;
+      padding: 0.6em;
+      border-radius: 5px;
+      border: 1px solid #e4e3e3;
+    }
+
+    & td {
+      display: block;
+      font-size: .8em;
+      text-align: right;
+      border: none;
+      padding: 0.5em;
+    }
+
+    & td::before {
+      content: attr(data-label);
+      float: left;
+      font-weight: bold;
+    }
+
+    & td:last-child {
+      border-bottom: 0;
+    }
+
+    .data-type-title td {
+      display: block;
+      background: #d8d8e9;
+      font-weight: bold;
+      text-align: center;
+      padding: 0.5em;
+      margin: 0.6em;
+      border-radius: 5px;
+    }
+  }
+
+  #gss-codes-body td {
+    text-align: left;
+  }
+}

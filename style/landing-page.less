@@ -1,0 +1,258 @@
+// landing-page.ts
+
+@import "os-gill-font.less";
+
+.open-landing-page-button {
+  bottom: 51px;
+  left: 9px;
+  width: 2.1rem;
+  height: 2.1rem;
+  z-index: 9001;
+  cursor: pointer;
+}
+
+.landing-page {
+  position: absolute;
+  z-index: 9002;
+  height: 100%;
+  width: 100%;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  font-family: 'Hanken Grotesk Variable', sans-serif;
+  text-align: center;
+  background: radial-gradient(
+      circle at 2% 12%,
+      #d400581f,
+      rgba(255, 0, 0, 0) 34.71%
+    ),
+    radial-gradient(circle at 8.7% 100%, #ff5f0029, rgba(0, 0, 253, 0) 31.71%),
+    radial-gradient(circle at 32% 9%, #22a7f00a, rgba(0, 255, 0, 0) 22.71%),
+    radial-gradient(circle at 105% 4%, #0280433b, rgba(0, 255, 0, 0) 48.71%),
+    radial-gradient(circle at 89% 70%, #22a7f033, rgba(255, 0, 0, 0) 34.71%),
+    radial-gradient(circle at 35% 85%, #d400581c, rgba(0, 255, 0, 0) 50.71%),
+    radial-gradient(circle at 19% 100%, #d400580d, rgba(0, 255, 0, 0) 54.71%)
+      #fffdf6;
+
+  // change if you wish to show an expiry date for the visual
+  &__expiry-message {
+    display: none;
+  }
+  
+  &__usage-terms {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    justify-content: flex-start;
+    max-width: 80%;
+    padding: 0 10px;
+    gap: 10px;
+    background: hsla(22, 100%, 50%, 0.1);
+    border-left: 4px solid #ff5e00;
+    color: #ff5f00;
+    font-family: 'Hanken Grotesk Variable', sans-serif;
+    align-items: center;
+
+    & p {
+      font-size: 1em;
+      text-align: left;
+    }
+  }
+
+  &__header {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    &__title {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 1rem 1.5rem 1rem 0;
+      .gap;
+    }
+  }
+
+  &__docs-logo-container {
+    display: flex;
+    justify-content: center;
+    .gap;
+  }
+
+  &__button {
+      .button;
+  
+      & span {
+        font-size: 18px;
+        padding-left: 6px;
+        pointer-events: none;
+      }
+    }
+
+  &__logo {
+    margin: 0.5rem 0;
+    width: 130px;
+    align-self: center;
+  }
+
+  &__icons {
+    height: 50px;
+  }
+
+  &__content {
+    max-width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    border-radius: 5px;
+    text-align: left;
+  }
+
+  &__copyable-box {
+    width: 65%;
+    border-radius: 5px;
+    background: #ffffff91;
+    border: 1px solid #ccc;
+    padding: 1px 10px;
+    display: flex;
+    align-items: center;
+    align-self: center;
+    overflow-wrap: anywhere;
+    user-select: text;
+    -webkit-user-select: text;
+    .box-shadow;
+  }
+
+  &__copy-button {
+    padding: 0.25rem;
+    margin-left: 0.5rem;
+  }
+
+  &__find-info {
+    display: flex;
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+
+    &__dummy-open-landing-button {
+      position: relative !important;
+      margin: 0 10px !important;
+      width: 2rem;
+      height: 2rem;
+      z-index: 9001;
+    }
+
+    & p {
+      margin: 0.5rem 0.5rem 0.5rem 0;
+      font-size: 1em;
+      font-family: 'Hanken Grotesk Variable', sans-serif;
+    }
+  }
+}
+
+@media screen and (max-height: 450px) {
+  /* when the screen gets smaller */
+
+  .landing-page {
+    &__icons {
+      display: none;
+    }
+
+    &__find-info {
+      display: none;
+    }
+  }
+}
+
+@media screen and (max-height: 550px) {
+  /* when the screen gets smaller */
+
+  .landing-page {
+    &__usage-terms {
+      margin: 10px 0;
+    }
+  }
+}
+
+@media screen and (max-width: 950px) {
+  .landing-page {
+    &__copyable-box {
+      width: 95%;
+    }
+  }
+}
+
+@media screen and (max-width: 700px) {
+  /* when the screen gets smaller */
+
+  .landing-page {
+    &__content {
+      max-width: 88%;
+    }
+
+    &__icons {
+      display: none;
+    }
+
+    &__header {
+      flex-direction: column-reverse;
+      width: 88%;
+    }
+
+    &__usage-terms {
+      max-width: 88%;
+      margin: 10px 0;
+
+      & p {
+        font-size: 0.8em;
+      }
+    }
+
+    &__find-info p {
+      font-size: 0.8em;
+    }
+
+    &__copyable-box {
+      width: 100%;
+    }
+  }
+}
+
+@media screen and (max-width: 320px) {
+  /* when the screen gets smaller */
+  .landing-page {
+
+    &__docs-logo-container {
+      .gap-small;
+    }
+
+    &__find-info p {
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+
+    &__usage-terms {
+      max-width: 92%;
+    }
+
+    &__content {
+      max-width: 92%;
+    }
+
+    &__header {
+      width: 92%;
+    }
+  }
+}
+
+@media screen and (max-width: 320px) and (max-height: 320px) {
+  .landing-page__logo {
+    width: 100px;
+  }
+
+  .landing-page__header {
+    width: 90%;
+  }
+}

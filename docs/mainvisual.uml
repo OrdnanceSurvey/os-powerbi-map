@@ -1,0 +1,66 @@
+@startuml
+class OSPowerBIVisual {
+    +update(options: VisualUpdateOptions): Promise<void>
+    +applySelection(selectionHandles: ISelectionId[]): Promise<void>
+    +getFormattingModel(): FormattingModel
+    +destroy(): void
+    +getPersistedSettings(identifier): any
+    +persistDataToCard(identifier, results): void
+}
+
+class OSPowerBIUIManager {
+    +ToggleLandingPage(turnOn: boolean): void
+    +ToggleMapAttribution(showPopup: boolean): void
+    +toggleNotificationDot(on: boolean): void
+    +BuildMapAttributionPopup(): void
+    +apiKeyUpdated(updateId: string): Promise<void>
+    +addDevMessage(msg: string): void
+    +addError(msg: string): void
+    +setUnauthorisedAlert(): void
+    +displayAuthInfo(details: any): void
+    +updateMapCanRender(): void
+    +SetViewOrEditMode(mode: string): void
+}
+
+class OSPowerBIMapManager {
+    +buildMap(bounds: any): void
+    +buildBaseLayerControl(): Promise<void>
+    +toggleVisibility(on: boolean): void
+    +clearDataFromMap(layer: any): void
+    +renderData(featureCollection: OSMapsCartographicFeatureCollection, layer: any, ...): void
+    +updateReferenceLayers(): void
+    +updateSettings(settings: any): void
+    +ToggleSpinner(on: boolean): void
+}
+
+class LegendManager {
+    +updatePointsLegend(points: any): void
+    +updateFeaturesLegend(features: any): void
+    +updateSizeLegend(points: any): void
+    +updateRefLegend(refLayerManager: any): void
+    +setLegendVisibility(show: boolean): void
+}
+
+class SettingsChangeTypes {
+    +ChangeEverything(): void
+    +SetAutozoom(isOn: boolean): void
+    +ShouldRebuildPoints: boolean
+    +ShouldRezoomMap: boolean
+    +ShouldRebuildPolygons: boolean
+    +ShouldRebuildMap: boolean
+    +ShouldUpdateZoomLimits: boolean
+    +ShouldRebuildBaseLayers: boolean
+    +AnySetting: boolean
+    +AnyData: boolean
+}
+
+class VisualStatus {
+    +GetStatusMessage(): string
+}
+
+OSPowerBIVisual --> OSPowerBIUIManager
+OSPowerBIVisual --> SettingsChangeTypes
+OSPowerBIVisual --> VisualStatus
+OSPowerBIUIManager --> OSPowerBIMapManager
+OSPowerBIUIManager --> LegendManager
+@enduml

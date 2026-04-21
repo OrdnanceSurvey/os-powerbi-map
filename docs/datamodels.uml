@@ -1,0 +1,28 @@
+@startuml
+class OSMapsGeoJson {
+    +updateColour(newColour: string): void
+    +updateOpacity(newopacity: number): void
+    +updateSize(newSize: number): void
+    +updateWeight(newWeight: number): void
+    +updateSelectedColour(newColour: string): void
+    +getPopupHTML(): string
+}
+
+class OSMapsMarkerPoint extends OSMapsGeoJson {
+    +getAsLatLong(): [number, number]
+}
+
+class OSMapsCartographicFeatureCollection {
+    +features: GeoJSON.Feature[]
+    +length_unique_geoms: number
+    +isCategorical: boolean
+    +getColourLegendItemDiv(withBorder: boolean = false): HTMLElement
+    +getSizeLegendItemDiv(): HTMLElement
+    +updateCartoSettings(cartoSettings: LayerCartoSettings): void
+    +pushFeature(newFeature: OSMapsGeoJson): void
+    +GeometriesEqual(other: OSMapsCartographicFeatureCollection): boolean
+}
+
+OSMapsCartographicFeatureCollection --> OSMapsGeoJson
+OSMapsGeoJson <|-- OSMapsMarkerPoint
+@enduml
