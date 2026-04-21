@@ -1,0 +1,57 @@
+# this workflow will package the pbiviz file and release it
+name: "Build and Release"
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 'lts/*'
+        cache: 'npm'
+
+    - name: Find and Replace
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        find: "{{APP_INSIGHTS}}"
+        replace:  ${{ secrets.APP_INSIGHTS_CONNECTION_STRING }}
+        include: "**resources.ts"
+        
+    - name: Read pbiviz visual version
+      id: pbiviz_version
+      run: |
+        VERSION=$(node -p "require('./pbiviz.json').visual.version")
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+
+    - name: Fail if version tag already exists
+      run: |
+        git fetch --tags
+        if git tag | grep -qx "v${{ steps.pbiviz_version.outputs.version }}"; then
+        echo "❌ Version already released. Bump visual.version in pbiviz.json."
+        exit 1
+        fi
+
+    - name: Build
+      run: |
+        npm install
+        pbiviz package
+
+    - name: Release
+      uses: softprops/action-gh-release@v3
+      with:
+        tag_name: v${{ steps.pbiviz_version.outputs.version }}
+        name: OS Power BI Map v${{ steps.pbiviz_version.outputs.version }}
+        files: |
+            dist/*.pbiviz
+
+
+    - run: echo "🍏 This job's status is ${{ job.status }}."
+        
