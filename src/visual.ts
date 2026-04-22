@@ -128,10 +128,16 @@ export class OSPowerBIVisual implements IVisual {
     this.sessionId = uuidv4();
     this.logWriter = new AppInsightsLogger();
 
-    if (!proj4.defs["EPSG:27700"]) {
+    // Check if EPSG:27700 is already defined using proj4.defs() as a getter
+    if (!proj4.defs("EPSG:27700")) {
       // Load OSTN transform, (or rather our 1:10 cut-down version)
-      // read the base-64 encoded .gsb file into a node Buffer and from there get the ArrayBuffer it wraps
-      const gsb_buff = Buffer.from(ostn15_osgb_to_etrs_lite, "base64").buffer as ArrayBuffer;
+      // read the base-64 encoded .gsb file and convert to ArrayBuffer for browser compatibility
+      const binaryString = atob(ostn15_osgb_to_etrs_lite);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const gsb_buff = bytes.buffer as ArrayBuffer;
       // pass the ArrayBuffer to proj4 to load as a nadgrid identified by 'ostn'
       proj4.nadgrid("ostn", gsb_buff);
       // create the transform, referencing the loaded nadgrid

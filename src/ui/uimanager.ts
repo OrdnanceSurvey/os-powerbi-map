@@ -419,8 +419,10 @@ export class OSPowerBIUIManager {
   // it is all hooked up but the div that displays it is set to display: none
   // as we nolonger use it - we are just leaving it in for educational purposes
   public displayAuthInfo(authDetails:ApiAuthResult){
-    document.getElementById('orgName').textContent = authDetails.org_name;
-    document.getElementById('expiryDate').textContent = authDetails.expiry.toDateString();
+    let orgName = document.getElementById('orgName');
+    if (orgName) { orgName.textContent = authDetails.org_name; }
+    let expiryDate = document.getElementById('expiryDate');
+    if (expiryDate) { expiryDate.textContent = authDetails.expiry.toDateString(); }
   }
 
    /**
