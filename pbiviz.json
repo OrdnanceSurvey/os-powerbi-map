@@ -12,7 +12,7 @@
     "apiVersion": "5.3.0",
     "author": {
         "name": "Ordnance Survey",
-        "email": "https://github.com/OrdnanceSurvey/os-powerbi-map/issues"
+        "email": "harry.gibson@os.uk"
     },
     "assets": {
         "icon": "assets/icon.png"
