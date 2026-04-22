@@ -4,7 +4,6 @@ dist
 .tmp
 wtr_fts_waterpoint.csv
 wtr_fts_waterpoint_lonlat.csv
-package-lock.json
 temp.ipynb
 test_data
 webpack.statistics.dev.html
