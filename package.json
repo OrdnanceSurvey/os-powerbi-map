@@ -32,6 +32,7 @@
     "leaflet-spin": "^1.1.2",
     "lodash": "^4.17.21",
     "powerbi-visuals-api": "~5.3.0",
+    "powerbi-visuals-tools": "^7.0.3",
     "powerbi-visuals-utils-dataviewutils": "^6.1.0",
     "powerbi-visuals-utils-formattingmodel": "6.0.0",
     "powerbi-visuals-utils-formattingutils": "^6.1.2",
