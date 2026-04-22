@@ -6,6 +6,9 @@ import pbiviz from "../pbiviz.json"
  * Includes URLs, color palettes, and other static resources.
  */
 export const visualVersion = pbiviz.visual.version;
+// connection string we insert in at build
+export const APP_INSIGHTS_CONNECTION_STRING = '{{APP_INSIGHTS}}';
+console.log(APP_INSIGHTS_CONNECTION_STRING)
 
 // ******* Visual ID and expiry date handling logic *******
 // these two lines will be modified by the python build script just before the webpack build...
@@ -28,9 +31,6 @@ let exp_date_placeholder = '{{EXPIRY_DATE}}';
 // conditional checks remain in the optimised code. 
 // We do this by doing some operations on the placeholder variables that webpack can't evaluate at build time, 
 // but which will still give us the information we need at runtime to know if the post-build script has modified them or not.
-// connection string we insert in at build
-export const APP_INSIGHTS_CONNECTION_STRING = '{{APP_INSIGHTS}}';
-console.log(APP_INSIGHTS_CONNECTION_STRING)
 const parsed_date = (new Date(Date.parse(exp_date_placeholder))).toString()
 // trick webpack by doing a date parse and looking at the result, it can't evaluate this
 export const EXPIRY_DATE = parsed_date === "Invalid Date"

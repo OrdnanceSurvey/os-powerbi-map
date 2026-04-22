@@ -8,21 +8,28 @@ import { APP_INSIGHTS_CONNECTION_STRING } from "../resources";
 export class AppInsightsLogger implements LogWriter {
   /** The Application Insights instance. */
   private appInsights;
-
+  private isValid:boolean;
   /**
    * Constructs an AppInsightsLogger and initializes Application Insights.
    */
   constructor() {
-    this.appInsights = new ApplicationInsights({
+    try{
+      this.appInsights = new ApplicationInsights({
       config: {
         // TODO: Move the connection string to a resources file
         connectionString:
           APP_INSIGHTS_CONNECTION_STRING,
         /* ...Other Configuration Options... */
       },
-    });
-    this.appInsights.loadAppInsights();
-    this.appInsights.trackPageView();
+      });
+      this.appInsights.loadAppInsights();
+      this.appInsights.trackPageView();
+      this.isValid = true;
+    }
+    catch(error){
+      this.isValid = false;
+      console.error("Unable to configure application insights with the provided connection string. Logging will not take place.")
+    }
   }
 
   /**
@@ -30,6 +37,7 @@ export class AppInsightsLogger implements LogWriter {
    * @param lr The log record to send.
    */
   sendLogRecord(lr: LogRecord): void {
+    if(!this.isValid) { return; }
     this.appInsights.trackEvent({
       name: "Power BI Visual Log",
       properties: Object.assign({}, lr),
