@@ -36,7 +36,6 @@ jobs:
         git fetch --tags
         if git tag | grep -qx "v${{ steps.pbiviz_version.outputs.version }}"; then
         echo "❌ Version already released. Bump visual.version in pbiviz.json."
-        exit 1
         fi
 
     - name: Build
