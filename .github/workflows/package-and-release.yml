@@ -42,7 +42,7 @@ jobs:
     - name: Build
       run: |
         npm install
-        pbiviz package
+        npm run package
 
     - name: Release
       uses: softprops/action-gh-release@v3
