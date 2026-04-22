@@ -8,7 +8,7 @@ import pbiviz from "../pbiviz.json"
 export const visualVersion = pbiviz.visual.version;
 // connection string we insert in at build
 export const APP_INSIGHTS_CONNECTION_STRING = '{{APP_INSIGHTS}}';
-console.log(APP_INSIGHTS_CONNECTION_STRING)
+console.log("App insights = "+APP_INSIGHTS_CONNECTION_STRING)
 
 // ******* Visual ID and expiry date handling logic *******
 // these two lines will be modified by the python build script just before the webpack build...
@@ -40,6 +40,7 @@ export const EXPIRY_DATE = parsed_date === "Invalid Date"
 export const VISUAL_ID = createHash(visual_id_placeholder) === '54e4e5122f27d258efc2068c2ec9e582' 
   ? 'OPEN_SOURCE'
   : visual_id_placeholder
+console.log("Visual ID = "+VISUAL_ID);
 // ******* End of visual ID and expiry date handling logic *******
 
 // Regex patterns for validating postcodes and hex color codes
