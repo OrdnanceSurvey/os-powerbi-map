@@ -21,7 +21,7 @@ jobs:
       uses: jacobtomlinson/gha-find-replace@v3
       with:
         find: "{{APP_INSIGHTS}}"
-        replace:  ${{ secrets.APP_INSIGHTS_CONNECTION_STRING }}
+        replace:  "${{ secrets.APP_INSIGHTS_CONNECTION_STRING }}"
         include: "**resources.ts"
         
     - name: Read pbiviz visual version
