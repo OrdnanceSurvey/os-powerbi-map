@@ -3,7 +3,7 @@ name: "Build and Release"
 
 on:
   push:
-    branches: [ main, change-pbiviz-filename ]
+    branches: [ main ]
 
 jobs:
   build:
