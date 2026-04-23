@@ -3,8 +3,7 @@ name: "Build and Release"
 
 on:
   push:
-    branches: [ main, powerbi-tooling-update ]
-
+    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest
