@@ -43,6 +43,12 @@ jobs:
         npm install
         npm run package
 
+    - name: Rename pbiviz output
+      run: |
+        VERSION=${{ steps.pbiviz_version.outputs.version }}
+        mv dist/*.pbiviz "dist/OS-Power-BI-Map-v$VERSION.pbiviz"
+
+
     - name: Release
       uses: softprops/action-gh-release@v3
       with:
