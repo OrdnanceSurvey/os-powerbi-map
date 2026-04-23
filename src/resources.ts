@@ -8,10 +8,18 @@ import pbiviz from "../pbiviz.json"
 export const visualVersion = pbiviz.visual.version;
 // connection string we insert in at build
 export const APP_INSIGHTS_CONNECTION_STRING = '{{APP_INSIGHTS}}';
-console.log("App insights = "+APP_INSIGHTS_CONNECTION_STRING)
 
 // ******* Visual ID and expiry date handling logic *******
-// these two lines will be modified by the python build script just before the webpack build...
+// Supports building visuals which have an in-built expiry date and/or a specific ID set 
+// at compile time (such an ID can be used for authorisation purposes at visual load by calling an API which 
+// returns a boolean indicating if that build is authorised). To use this functionality, a build script 
+// can overwrite these placeholders at build time, but if they are not overwritten (i.e. if the 
+// visual is built directly using pbiviz package or if the debug version is run), then the visual 
+// will still work as in the open source released builds.) A python build script is included in the 
+// repo to automate the process of building visuals with varying IDs and expiry dates; alternatively 
+// this can be done via a github CI flow  or by editing the placeholders manually.
+
+// These two lines may be modified by the python build script just before the webpack build...
 let visual_id_placeholder = '{{VISUAL_ID}}';
 let exp_date_placeholder = '{{EXPIRY_DATE}}';
 // ... but if they have not been (because we have built the visual manually or are running 
@@ -21,7 +29,7 @@ let exp_date_placeholder = '{{EXPIRY_DATE}}';
 // If, in the transpiled code from webpack, the placeholder variables above are not 
 // equal to the placeholder values we can see above in this source code, then the post-build 
 // script has changed them so those are what we want to export. If in the transpiled code 
-// they ARE equal to the the placeholder values then we need to replace them at runtime with 
+// they ARE equal to the the placeholder values then we need to replace them at _runtime_ with 
 // "safe" values so the code can run if it has been built by pbiviz_package but not modified 
 // by our post-build script.
 // But there is a catch! We can't just do this: 
@@ -40,7 +48,6 @@ export const EXPIRY_DATE = parsed_date === "Invalid Date"
 export const VISUAL_ID = createHash(visual_id_placeholder) === '54e4e5122f27d258efc2068c2ec9e582' 
   ? 'OPEN_SOURCE'
   : visual_id_placeholder
-console.log("Visual ID = "+VISUAL_ID);
 // ******* End of visual ID and expiry date handling logic *******
 
 // Regex patterns for validating postcodes and hex color codes

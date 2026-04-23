@@ -4,7 +4,6 @@ name: "Build and Release"
 on:
   push:
     branches: [ main ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
