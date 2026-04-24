@@ -44,7 +44,7 @@ export default function createLandingPageContent(
       } else if (button.classList.contains('ireland-mapping')) {
         launchButtonCallback("https://www.ordnancesurvey.co.uk/blog/whats-the-difference-between-uk-britain-and-british-isles")
       } else if (button.classList.contains('licence-agreement')) {
-        launchButtonCallback("https://www.ordnancesurvey.co.uk/documents/licences/OS-PowerBI-Visual.pdf")
+        launchButtonCallback("https://github.com/OrdnanceSurvey/os-powerbi-map?tab=MIT-1-ov-file#readme")
       } else if (button.classList.contains('landing-page__copy-button')) {copyCallback(button);
       }
   });

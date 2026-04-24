@@ -295,7 +295,7 @@ export class OSPowerBIMapManager {
       const button = event.target as HTMLElement;
       if (button.classList.contains("terms")) {
         this.hostVisual.host.launchUrl(
-          // TODO remove hardcoding and get this from a config file pointing to the github license
+          // map viewing terms can stay as this url
           "https://labs.os.uk/licensing/public-viewing-terms.pdf"
         );
       }

@@ -82,7 +82,7 @@ const Templates = {
   // to the landing-page.less and edit the styling for
   // landing-page__expiry-message which is currently set to display: none
   Banner: `<span class="material-symbols-rounded">bolt</span>
-  <p> The OS Power BI Visual is now an open source project on GitHub, maintained by a small team on a best-efforts basis. By using this visual, you agree to the <em class="licence-agreement">licence terms</em>. To raise a bug or suggest enhancements, please <em class="report-bug">log a GitHub Issue</em>. You are using v<span id="version"></span> of the visual<span id="versionUpdateNotice"></span>. <span class="landing-page__expiry-message"><span id="expiryDate"></span></span></p>`,
+  <p> The OS Power BI Visual is now an open source project on GitHub, maintained by a small team on a best-efforts basis. It is published under the terms of the <em class="licence-agreement">MIT License</em>. To raise a bug or suggest enhancements, please <em class="report-bug">log a GitHub Issue</em>. You are using v<span id="version"></span> of the visual<span id="versionUpdateNotice"></span>. <span class="landing-page__expiry-message"><span id="expiryDate"></span></span></p>`,
   
   NotificationPopup: `
     <div class="notification-popup__container">
