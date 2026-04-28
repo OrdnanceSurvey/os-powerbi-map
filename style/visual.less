@@ -22,11 +22,12 @@
   flex-direction: row;
   cursor: pointer;
   text-decoration: none;
-  font-size: 1em;
   align-items: center;
   border: solid 2px #ff5f00;
   color: #ff5f00;
-  padding: 10px 15px;
+  font-size: 1em;
+  font-family: 'Hanken Grotesk Variable', sans-serif;
+  padding: 6px 10px;
   border-radius: 5px;
   background: #fff;
   .box-shadow();
@@ -152,6 +153,13 @@ em {
 
   p {
     font-size: 0.9em;
+  }
+}
+
+@media screen and (max-height: 500px) {
+  /* when the screen gets smaller */
+  h1 {
+    font-size: 1.3em;
   }
 }
 

@@ -103,12 +103,7 @@ const Templates = {
     </span>`,
 
   CloseButton: `
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,600,0,0" />
-    <button
-		class="toggle close-button" id="landing-close-button"
-		>
 		<span class="material-symbols-rounded"> close </span>
-	</button>
     `,
 
   InfoButton: `
@@ -126,7 +121,7 @@ const Templates = {
     <span class="material-symbols-rounded" style="font-size: 25px;"> help </span>
     </button>
     <p>If you need it again, this page lives in the bottom left corner of the visual.</p>   `,
-  Title: `<div class="landing-page__header__title">${treesIcon}<h1 class="landing-page__title">Getting Started with the OS Power BI Visual</h1></div>`,
+  Title: `<div class="landing-page__header__title">${treesIcon}<h1 class="landing-page__title">Getting Started with the OS Power BI Map Visual</h1></div>`,
 
   DocsButton: `
   <button class="landing-page__button docs-button">Docs<span class="material-symbols-rounded">

@@ -16,7 +16,11 @@
     background: #ffffffb5;
     border-radius: 5px;
     cursor: pointer;
-    .box-shadow()
+    .box-shadow();
+
+    & span {
+      font-size: 1.3em;
+    }
   }
 
   &__tab-icon {
@@ -40,6 +44,7 @@
     padding: 30px;
     border-radius: 0 0 5px 5px;
     background: #ffffffb5;
+    box-sizing: border-box;
     .box-shadow();
   }
 
@@ -126,7 +131,7 @@
     }
 
     & > label {
-      padding: 10px;
+      padding: 7px;
     }
   }
 }
@@ -164,6 +169,18 @@
 }
 
 @media screen and (max-width: 320px) {
+  .tabset__panel {
+    padding: 10px;
+}
+}
+
+@media screen and (max-height: 610px) {
+  .tabset__panel {
+    padding: 20px;
+}
+}
+
+@media screen and (max-height: 360px) {
   .tabset__panel {
     padding: 10px;
 }
