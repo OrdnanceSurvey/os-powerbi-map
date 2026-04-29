@@ -17,7 +17,7 @@ const Templates = {
         <p>Please note: you can only upload files, not folders. Max file size is 50Mb. Only one dataset can be uploaded and in use at a time.</p>
       </section>
       <section class="user-data-uploader__no-data-warning" style="display: none;">
-        <p>No PowerBI data has been added to the visual yet. Unfortunately we cannot process uploaded data (even to display it as "unmatched data") unless some PowerBI data is present, due to limitations in PowerBI. 
+        <p>No Power BI data has been added to the visual yet. Unfortunately we cannot process uploaded data (even to display it as "unmatched data") unless some Power BI data is present, due to limitations in Power BI. 
         Please add some data to at least one field of the visual and re-open this dialog. 
         </p>
       </section>
@@ -170,14 +170,18 @@ const Templates = {
     
     <h2>Core concepts</h2>
     <p>The visual supports up to three layers on the map at once, which can be styled and symbolised separately.
-    There is a marker points layer, a features layer, and a reference layer.</p> 
-    <p>The <b>marker points layer</b> can contain point data from your Power BI data model, supplied either as coordinates, postcodes, or UPRNs.</p>
-    <p>The <b>features layer</b> can contain point, line, or polygon data which can be supplied in one of three ways: directly from your data model as WKT or GeoJSON; geocoded from GSS codes in your data model; or
-    matched from a column in your data to features in a spatial dataset that you can upload into the visual.</p>
-    <p>Finally the <b>reference layer</b> can contain reference data such as administrative boundaries which are geocoded from GSS codes but are not matched to any specific data from your data model.</p>
+    There is a marker points layer, a features layer, and a reference layer.</p>
+    <ul class="tabset__bullets">
+      <li>The <b>marker points layer</b> can contain point data from your Power BI data model, supplied either as coordinates, postcodes, or UPRNs.</li>
+
+      <li>The <b>features layer</b> can contain point, line, or polygon data which can be supplied in one of three ways: directly from your data model as WKT or GeoJSON; geocoded from GSS codes in your data model; or 
+      matched from a column in your data to features in a spatial dataset that you can upload into the visual.</li>
+
+      <li>Finally the <b>reference layer</b> can contain reference data such as administrative boundaries which are geocoded from GSS codes but are not matched to any specific data from your data model.</li>
+    </ul>
     <p>To create a map, drag a location-based column from your data into the relevant field in the Build Visual pane. We support point, polygon and line geometries using the following spatial formats:</p>
 
-      <table class="table-container" width="100%" role="table" aria-label="Supported Spatial Formats">
+      <table class="table-container" role="table" aria-label="Supported Spatial Formats">
       <caption>Lines, Points and Polygons are supported in common geospatial formats</caption>
       <thead>
         <tr class="flex-table header" role="rowgroup">
@@ -206,7 +210,7 @@ const Templates = {
           <td class="table-container--flex-row" data-label="Visual Field(s)">Points: Postcodes or UPRNs</td>
         </tr>
         <tr class="data-type-title">
-          <td colspan="3">Points, Lines or Polygons (from your PowerBI data model)</td>
+          <td colspan="3">Points, Lines or Polygons (from your Power BI data model)</td>
         </tr>
         <tr class="card">
           <td class="table-container--flex-row" data-label="Format">Well-Known Text (WKT)</td>
@@ -224,7 +228,7 @@ const Templates = {
         <tr class="card">
           <td class="table-container--flex-row" data-label="Format">GeoJSON file,  TopoJSON file, shapefile (zipped), shapefile (individual files)</td>
           <td class="table-container--flex-row" data-label="Map Layer">Features</td>
-          <td class="table-container--flex-row" data-label="Visual Field(s)">Features Layer: Identifiers to match</td>
+          <td class="table-container--flex-row" data-label="Visual Field(s)">Features Layer: Identifiers to match in uploaded geometries</td>
         </tr>
         <tr class="data-type-title">
           <td colspan="3">Polygons</td>
@@ -232,7 +236,7 @@ const Templates = {
         <tr class="card">
           <td class="table-container--flex-row" data-label="Format">Government Statistical Service (GSS) code</td>
           <td class="table-container--flex-row" data-label="Map Layer">Features</td>
-          <td class="table-container--flex-row" data-label="Visual Field(s)">Features Layer: GSS Identifiers for geocoding</td>
+          <td class="table-container--flex-row" data-label="Visual Field(s)">Features Layer: GSS Identifiers for geocoding ONS boundaries</td>
         </tr>
          <tr class="data-type-title">
           <td colspan="3">Reference features</td>
@@ -250,8 +254,8 @@ const Templates = {
     
     <p>It is also possible to use a list of GSS codes to display a permanent reference layer on the map (not filtered by/connected to the report data), for example if you'd like to view certain geographies as context to your data. This can be configured in <b>Reference Layer Settings</b> in <b>Format visual</b>.</p>
 
-    <h2>GeoJSON (from PowerBI data model)</h2>
-    <p>There are two different ways you can use GeoJSON that's contained within your PowerBI data model in this visual:</p>
+    <h2>GeoJSON (from Power BI data model)</h2>
+    <p>There are two different ways you can use GeoJSON that's contained within your Power BI data model in this visual:</p>
     <p>1) You can visualise features using a JSON formatted geometry column within a table - this can be just the geometry, e.g. {"type": "Polygon", "coordinates": [...]} or may be a Feature, e.g. {"type": "Feature", "properties": {...}, "geometry": ...}. If the Feature has properties, these will be added to map popups by default but will be replaced if a column is dragged into the <b>Features Layer: Popups</b> field.</p>
     <p> 2) Load an entire GeoJSON file. This requires a few extra steps:</p>
     <p>Go to <b>Get data</b> > <b>JSON</b> > <b>Connect</b> and navigate to your GeoJSON file.</p>
@@ -261,7 +265,7 @@ const Templates = {
     ${customColImage}
     <p>Click <b>OK</b>, go back to the Home tab and <b>Close & Apply</b>, then drag your new 'geom' column into the <b>Features Layer: GeoJSON or WKT Geometries</b> field in Build visual.</p>
 
-    <h2>WKT (from PowerBI data model)</h2>
+    <h2>WKT (from Power BI data model)</h2>
     <p>You can also visualise your data using WKT geometry, where each row in your geometry column should begin with a type like POINT, LINESTRING, or POLYGON and be followed by brackets containing coordinates.</p>
 
     <p>This should be fairly straightforward to achieve using your software of choice. For example, in QGIS you can save out geospatial data in CSV format with WKT geometry by right-clicking the layer you want, then <b>Export</b> > <b>Save Features As</b>. In the dialog box, select <b>Comma Separated Value [CSV]</b> as your format and <b>AS_WKT</b> for <b>Geometry</b> in <b>Layer Options</b> further down. Load this CSV into Power BI and drag the WKT geometry column into the <b>Features Layer: GeoJSON or WKT Geometries</b> field in Build visual - then your features should appear!</p>
@@ -272,7 +276,7 @@ const Templates = {
     <p>You can browse to select the file you want to upload. This can either be a GeoJSON file, a TopoJSON file, or a shapefile (either zipped or individual files). 
     If you are uploading a shapefile, please ensure that all component files (.shp, .shx, .dbf, .prj, .cpg) are included in the zip or uploaded together if uploading individual files. GeoJSON / TopoJSON files should 
     contain latitude/longitude coordinates; shapefiles may be in other coordinate systems but a .prj file must be provided.</p>
-    <p>Once you've uploaded a file, it will be scanned to identify which columns/attributes contain unique values. These columns will be available to be joined to data from your PowerBI data model. 
+    <p>Once you've uploaded a file, it will be scanned to identify which columns/attributes contain unique values. These columns will be available to be joined to data from your Power BI data model. 
     The remaining (non-unique) columns will also be listed, and can be included in the report if you select the "Load all columns to report" checkbox. This will allow you to use these columns in pop-ups, 
     but may use more memory if you have a lot of columns in your data, so we recommend only selecting this option if you need it.</p>
     <p>If the columns seem to be correct, then select "Continue and Load Data" to load the data into the Power BI report. Note that if no unique columns are found, the continue button will not be enabled and 
@@ -282,7 +286,7 @@ const Templates = {
     <p>The visual will then join your data to the uploaded geospatial data and display the matched features on the map with symbology as selected on the Styling: Features Layer card. 
     You can also choose to display all the features from the uploaded data which have <i>not</i> been matched, by selecting the "Show unmatched uploaded features" toggle. When this is turned on, all of the features from your 
     uploaded data which do not match (this could potentially be all of them) will be displayed on the map with the symbology defined under the "Unmatched uploaded features" dropdown. Note that for this to work, you need to have at least one field 
-    added somewhere on the Build Visual pane (even though these features will not be attached to the PowerBI data, something needs to be present for the visual to be properly rendered by PowerBI).</p>
+    added somewhere on the Build Visual pane (even though these features will not be attached to the Power BI data, something needs to be present for the visual to be properly rendered by Power BI).</p>
     <p>You can upload a new file at any time, which will replace the existing uploaded data, or you can unload the data from the report by re-opening the upload manager and hitting the delete icon and then "Unload data". </p> 
     <p>Please note: Once you press "load data", the data will be stored in the report after it is saved. For larger uploads this is likely to substantially affect the file size of the report. </p>
     <h2>Layers</h2>
@@ -295,26 +299,40 @@ const Templates = {
 
     <h2>Marker points</h2>
     <p>The styling controls that are shown when you choose "Markers (points-only) layer" in the dropdown at the top of the Symbology Settings pane will vary depending what data (if any) have been added to the 
-    size and colour fields. Points can be coloured by a numeric or categorical column in your data by dragging it into the Point Colour field, or this can be left empty to use a single colour for all points. 
-     
-     If data have been added to the colour field, you will see colour pickers for the highest and lowest value in the case of 
-     numeric data, or the first and last value (alphabetically) in the case of categorical data. For numeric data, a "% clip" slider allows you to remove the highest and lowest values in your data when scaling colours - this can be useful if 
-     you have outliers in your data. For categorical data, a toggle allows you to choose whether to use a distinct colour for each category (based on a preset palette chosen to maximise contrast), or to interpolate between the two selected colours. 
-     Note that a maximum of 12 distinct categories are supported; if your data contains more than 12 categories, the remaining categories will be coloured using a grey colour. Whichever method you choose, a legend will be shown on the map to 
-     explain the colour scheme. Alternatively, you may use a column in your data containing colour hex codes to directly specify the colour for every point, although these hex codes will not be displayed in a legend.</p>
-     <p>Meanwhile if no data are added to the colour field, a single colour picker controls the colour of all points.</p>
-     <p>Similarly, points can be sized according to a numeric column in your data by dragging it into the Point Size field. Two size sliders allow you to adjust the maximum and minimum size of points on the map, and a "% clip" slider 
-     allows you to remove the highest and lowest values in your data when scaling sizes - this can be useful if you have outliers in your data. A legend will be shown to explain the size scaling. 
-     If no data is added to the size field, all points will be shown at the same size, which can be adjusted using a single size slider. </p>
+    size and colour fields. 
+
+    <ul class="tabset__bullets">
+    <li>Points can be coloured by a numeric or categorical column in your data by dragging it into the Point Colour field, or this can be left empty to use a single colour for all points.</li>
+
+    <li>If data have been added to the colour field, you will see colour pickers for the highest and lowest value in the case of 
+     numeric data, or the first and last value (alphabetically) in the case of categorical data.</li>
+
+    <li>For numeric data, a "% clip" slider allows you to remove the highest and lowest values in your data when scaling colours - this can be useful if 
+     you have outliers in your data.</li>
+
+    <li>For categorical data, a toggle allows you to choose whether to use a distinct colour for each category (based on a preset palette chosen to maximise contrast), or to interpolate between the two selected colours. 
+     Note that a maximum of 12 distinct categories are supported; if your data contains more than 12 categories, the remaining categories will be coloured using a grey colour.</li>
+
+    <li>Similarly, points can be sized according to a numeric column in your data by dragging it into the Point Size field. Two size sliders allow you to adjust the maximum and minimum size of points on the map, and a "% clip" slider 
+     allows you to remove the highest and lowest values in your data when scaling sizes - this can be useful if you have outliers in your data.</li>
+
+    <li>If no data is added to the size field, all points will be shown at the same size, which can be adjusted using a single size slider.</li>
+
+    </ul>
+    
+    Whichever method you choose, a legend will be shown on the map to 
+     explain the sizing and colour scheme. You may also use a column in your data containing colour hex codes to directly specify the colour for every point, although these hex codes will not be displayed in a legend.</p>
+
      <p>
      An opacity slider allows you to adjust the transparency of your points, and a final slider allows you to adjust the thickness of the point boundaries.</p>
+
      <p>You can customise what data is shown when the user clicks on the points on the map by specifying columns in the Points: Pop-ups field in Build Visual. You can add more than one data column to this field, and the order in which they are listed 
      will determine the order in which they are displayed in the pop-up; number formatting configured in the Format Visual / General / Data Format control will be respected in the pop-ups and legend.</p>
     
      <h2>Features</h2>
     <p>The colour of features in the Features Layer can be controlled in the same way as the Marker Points layer, by choosing "Features Layer" in the dropdown at the top of the Symbology Settings pane and optionally adding a column to the 
     Features Layer: Colour field in Build Visual to colour by data. 
-    These controls apply to the features layer, no matter whether the data have been added via GeoJSON/WKT, by geocoding GSS identifiers, or by uploading your own geospatial data and matching it to PowerBI features. 
+    These controls apply to the features layer, no matter whether the data have been added via GeoJSON/WKT, by geocoding GSS identifiers, or by uploading your own geospatial data and matching it to Power BI features. 
     (Unmatched features from uploaded data, however, are styled using a separate pane - see below). The only difference is that if the features layer contains point geometries, there will only be a single size slider for point size, 
     as sizing by data is not currently supported for point geometries in the features layer.</p>
     <p> As with the marker points layer, you can control the opacity and border thickness of the features layer. You can also customise what data is displayed in pop-ups using the Features Layer: Pop-ups field.</p>
@@ -324,7 +342,7 @@ const Templates = {
     </p>
 
     <h2>Unmatched uploaded features</h2>
-    <p>If you are uploading your own geospatial data into the visual, you can choose to display any features which have not been matched to your PowerBI data. These unmatched features can be styled separately by choosing "Unmatched uploaded features" 
+    <p>If you are uploading your own geospatial data into the visual, you can choose to display any features which have not been matched to your Power BI data. These unmatched features can be styled separately by choosing "Unmatched uploaded features" 
     in the dropdown at the top of the Symbology Settings pane. You can control border style, border thickness, fill colour and fill opacity, as well as point sizing in the case of point geometries.</p>
     <div class="tabset__images">${pointsImage}${polygonsImage}${bristolLinesImage}</div>
       </section>

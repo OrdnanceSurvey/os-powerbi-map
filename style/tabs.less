@@ -3,6 +3,17 @@
 @import "os-gill-font.less";
 
 .tabset {
+
+  &__bullets {
+    margin: 0;
+
+    &  li {
+    list-style: disc;
+    font-size: 1em;
+    margin: 1em;
+  }
+  }
+
   & > input[type="radio"] {
     position: absolute;
     left: -200vw;
