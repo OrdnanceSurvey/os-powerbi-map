@@ -1,5 +1,4 @@
 "use strict";
-import { internal_boundaryline_url } from "../resources";
 import L, { LatLngBounds } from "leaflet";
 import * as esri from "esri-leaflet";
 import { createHash } from "./utils";
@@ -20,8 +19,6 @@ export class PolygonGeocoder {
   UIManager: OSPowerBIUIManager;
   /** Local cache of geocoded polygon results, keyed by cleaned identifier. */
   cache: GeojsonFeatureDictionary;
-  /** Default service URL for boundary line queries. */
-  serviceUrl: string = internal_boundaryline_url;
   /** Maximum allowable offset in degrees for geometry simplification. */
   maxAllowableOffsetDegrees: number;
   /** Lookup table mapping GSS code prefixes to service details. */
