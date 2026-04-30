@@ -17,7 +17,7 @@ To get started, download the visual .pbiviz file from [Releases](https://github.
 
 ## Contributing
 
-We welcome contributions from the community via issues and pull requests. The repo is maintained by a team of 2 developers alongside our normal work but we will try our best to support in a timely manner.
+We welcome contributions from the community via issues and pull requests. The repo is maintained by a team of 2 developers in addition to our normal work but we will try our best to support in a timely manner.
 
 ### Developing locally
 
