@@ -22,11 +22,12 @@
   flex-direction: row;
   cursor: pointer;
   text-decoration: none;
-  font-size: 1em;
   align-items: center;
   border: solid 2px #ff5f00;
   color: #ff5f00;
-  padding: 10px 15px;
+  font-size: 1em;
+  font-family: 'Hanken Grotesk Variable', sans-serif;
+  padding: 6px 10px;
   border-radius: 5px;
   background: #fff;
   .box-shadow();
@@ -97,7 +98,6 @@ h1 {
 h2 {
   font-size: 1.1em;
   margin-bottom: 0;
-  font-weight: normal;
 }
 
 h3 {
@@ -144,7 +144,7 @@ em {
   background: #453c90;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 900px) {
   /* when the screen gets smaller */
   h1 {
     font-size: 1.3em;
@@ -153,9 +153,30 @@ em {
   p {
     font-size: 0.9em;
   }
+
+  ul {
+    font-size: 0.9em;
+  }
 }
 
-@media screen and (max-width: 320px) and (max-height: 320px) {
+@media screen and (max-width: 400px) {
+  /* when the screen gets smaller */
+  h1 {
+    font-size: 1.1em;
+  }
+}
+
+
+
+@media screen and (max-height: 600px) {
+  /* when the screen gets smaller */
+  h1 {
+    font-size: 1.3em;
+  }
+}
+
+@media screen and (max-height: 400px) {
+  /* when the screen gets smaller */
   h1 {
     font-size: 1.1em;
   }
