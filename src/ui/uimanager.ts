@@ -56,7 +56,7 @@ export class OSPowerBIUIManager {
     this.mapManager = new OSPowerBIMapManager(this, this.mapDiv);
 
     this.landingDiv = document.createElement("div");
-    this.landingDiv.className = "landing-page";
+    // this.landingDiv.className = "landing-page";
     this.landingDiv.setAttribute("style", "display:none");
     this.buildLandingPageContent();
     this.target.appendChild(this.landingDiv);

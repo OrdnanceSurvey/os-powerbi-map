@@ -6,12 +6,14 @@ export default function createLandingPageContent(
   launchButtonCallback: Function,
   copyCallback: Function
 ): HTMLElement {
-  const closeButton: HTMLElement = document.createElement("div");
+  const closeButton: HTMLElement = document.createElement("button");
   const landingPageContent: HTMLElement = document.createElement("div");
   const banner: HTMLElement = document.createElement("div"); 
   const header: HTMLElement = document.createElement("div"); 
   const docsPlusLogo: HTMLElement = document.createElement("div");
   const contentContainer: HTMLElement = document.createElement("div");
+  closeButton.className = "toggle close-button";
+  closeButton.id = "landing-close-button";
   landingPageContent.className = "landing-page";
   contentContainer.className = "landing-page__content";
   header.className = "landing-page__header"
@@ -35,7 +37,7 @@ export default function createLandingPageContent(
       if (button.classList.contains('apikey-button')) {
         launchButtonCallback("https://osdatahub.os.uk/products/")
       } else if (button.classList.contains('docs-button')) {
-        launchButtonCallback("https://docs.os.uk/os-downloads/visualisation-products/os-maps-for-power-bi-visual-beta-product/os-maps-for-power-bi-visual-getting-started-guide")
+        launchButtonCallback("https://docs.os.uk/more-than-maps/advanced-applications/os-ngd-data-in-dashboards/os-power-bi-map-visual")
       }
       else if (button.classList.contains('public-viewing-terms')) {
         launchButtonCallback("https://labs.os.uk/licensing/public-viewing-terms.pdf")
