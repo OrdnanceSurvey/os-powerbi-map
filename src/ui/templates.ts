@@ -363,7 +363,7 @@ const Templates = {
     <input type="checkbox" checked>
     <i class="accordion__arrow"></i>
     <h2 class="accordion__question">How many 'layers' of points and polygons can I add to my map?</h2>
-    <p class="accordion__answer">The visual supports two layers of data: one points-only layer using either UPRN, Postcode or an X and Y coordinate (BNG or WGS84), and one 'Features' layer which could be points, lines, or polygons (or all three if you append your datasets together). The Features layer can use GSS codes or WKT/GeoJSON geometries. To display both layers there must be a relationship between your two data tables, e.g. a common attribute. You can do this by going to your Data Model > Manage Relationships + New Relationship. Alternatively you could preprocess your data and append all the datasets you want to visualise into one table.</p>
+    <p class="accordion__answer">The visual supports three layers of data: one points-only layer using either UPRN, Postcode or an X and Y coordinate (BNG or WGS84), one 'Features' layer which could be points, lines, or polygons (or all three if you append your datasets together), and a reference layer (ONS boundaries using GSS codes). The Features layer can use GSS codes, WKT/GeoJSON geometries, or a shapefile/GeoJSON/TopoJSON file. To display both points and feature layers there must be a relationship between your two data tables, e.g. a common attribute. You can do this by going to your Data Model > Manage Relationships + New Relationship. Alternatively you could preprocess your data and append all the datasets you want to visualise into one table.</p>
   </li>
 
 <li class="accordion__dropdown">
@@ -388,7 +388,7 @@ const Templates = {
 <i class="accordion__arrow"></i>
 <h2 class="accordion__question">How do I combine points and polygons to display on a map?
 </h2>
-<p class="accordion__answer">You can use the Points fields (with coordinates, postcodes, or UPRNs) in combination with the Features fields (GSS Identifiers, GeoJSON or WKT). This would require a relationship between your data tables (i.e. between a common attribute). Alternatively, you could append your data tables together before loading them into Power BI (or using Power BI built-in tools in Transform data) and use the Features Layer: GeoJSON or WKT geometries.</p>
+<p class="accordion__answer">You can use the Points fields (with coordinates, postcodes, or UPRNs) in combination with the Features fields (GSS Identifiers, GeoJSON or WKT, uploaded data and a linking identifier). This would require a relationship between your data tables (i.e. between a common attribute). Alternatively, you could append your data tables together before loading them into Power BI (or using Power BI built-in tools in Transform data) and use the Features Layer: GeoJSON or WKT geometries or Upload geospatial data tab in Format visual.</p>
 </li>
 
 <li class="accordion__dropdown">
