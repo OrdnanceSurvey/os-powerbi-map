@@ -11,6 +11,8 @@ jobs:
     steps:
     - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - uses: actions/setup-node@v4
       with:
         node-version: 'lts/*'
@@ -35,6 +37,14 @@ jobs:
         git fetch --tags
         if git tag | grep -qx "v${{ steps.pbiviz_version.outputs.version }}"; then
         echo "❌ Version already released. Bump visual.version in pbiviz.json."
+        exit 1
+        fi
+
+    - name: Fail if changelog not updated
+      run: |
+        if ! git diff --name-only $(git describe --tags --abbrev=0) | grep -q CHANGELOG.md; then
+          echo "❌ CHANGELOG.md must be updated for every release."
+          exit 1
         fi
 
     - name: Build
