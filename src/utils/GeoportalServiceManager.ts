@@ -1,7 +1,6 @@
 import * as esri from "esri-leaflet";
 import { FeatureCollection } from "geojson";
 import { LatLngBounds } from "leaflet";
-import { promisify } from "util";
 import { GSSServiceDetails } from "../types/geocoding-types";
 import {EsriQueryCheckResult, GeocodeParams} from "../types/geocoding-types"
 import { fetchGSSServices } from "./getGSSInfo";
@@ -37,6 +36,7 @@ export class GeoportalServiceManager{
      */
     static async GeoportalServiceManager() {
       const service_urls = await fetchGSSServices();
+      console.log("Service URLs loaded:", service_urls);
       return new GeoportalServiceManager(service_urls);
     }
 
@@ -122,10 +122,9 @@ export class GeoportalServiceManager{
       let msg: any;
       if(getCount){
         try {
-          const querycount = promisify(query.count).bind(query);
-          count = await querycount();
+          count = await new Promise<number>((resolve, reject) => query.count((error, n) => error ? reject(error) : resolve(n)));
         } catch (error) {
-          msg = error.message;
+          msg = error instanceof Error ? error.message : String(error);
           return {
             prefix: prefix,
             n_features: count,
@@ -142,8 +141,7 @@ export class GeoportalServiceManager{
           // get the bounds of the features we'll be returning, to give us an impression of how big a geographic
           // extent it is. We'll assume that if it's a bigger extent, we're less likely to go pixel-peeping
           // and can get away with a more generalised geometry to keep volumes down
-          const querybounds = promisify(query.bounds).bind(query);
-          bnds = await querybounds();
+          bnds = await new Promise<LatLngBounds>((resolve, reject) => query.bounds((error, b) => error ? reject(error) : resolve(b)));
         } catch (error) {
           msg = "Shouldn't get here, oops!"
         }
@@ -178,9 +176,9 @@ export class GeoportalServiceManager{
           const xFactor = dataWidthDegrees / 1000;
           const yFactor = dataHeightDegrees / 700;
           const factor = Math.min(xFactor, yFactor);
-          query.params["maxAllowableOffset"] = factor * 0.1;
+          (query.params as any)["maxAllowableOffset"] = factor * 0.1;
         } else {
-          query.params["maxAllowableOffset"] = maxAllowableOffsetDegrees;
+          (query.params as any)["maxAllowableOffset"] = maxAllowableOffsetDegrees;
         }
       }
       return query;
@@ -213,8 +211,7 @@ export class GeoportalServiceManager{
         // using the required callback syntax approach will make the calling code in the visual
         // more complex. So I have wrapped the esri query run into a promise so we can use
         // async/await syntax
-        const queryRun = promisify(query.run).bind(query);
-        return queryRun()
+        return new Promise<FeatureCollection>((resolve, reject) => query.run((error, fc) => error ? reject(error) : resolve(fc)))
       }));
       let combinedFeatureCollection: FeatureCollection;
       try {

@@ -1,7 +1,6 @@
 import { postcode_regex} from "../resources";
 import { postcodeUrl_Esri, uprnUrl_Esri } from "../resources";
 import * as esri from "esri-leaflet";
-import { promisify } from "util";
 import { FeatureCollection } from "geojson";
 import { OSPowerBIUIManager } from "../ui/uimanager";
 import { PointDictionary, GeocodeTypes, IdentifierParseResults, GeocodeParams, GeocodeMetrics } from "../types/geocoding-types"
@@ -339,8 +338,7 @@ export class PointGeocoder {
       }
       let allProm = Promise.all(pageOffsets.map(function(resultPageStart){
         query.offset(resultPageStart);
-        const queryRun = promisify(query.run).bind(query);
-        return queryRun()
+        return new Promise<FeatureCollection>((resolve, reject) => query.run((error, fc) => error ? reject(error) : resolve(fc)))
       }));
       //const queryrun = promisify(query.run).bind(query);
       let combinedFeatureCollection: FeatureCollection;
