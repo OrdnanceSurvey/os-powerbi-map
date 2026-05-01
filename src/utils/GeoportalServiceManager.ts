@@ -124,7 +124,7 @@ export class GeoportalServiceManager{
         try {
           count = await new Promise<number>((resolve, reject) => query.count((error, n) => error ? reject(error) : resolve(n)));
         } catch (error) {
-          msg = error.message;
+          msg = error instanceof Error ? error.message : String(error);
           return {
             prefix: prefix,
             n_features: count,
@@ -176,9 +176,9 @@ export class GeoportalServiceManager{
           const xFactor = dataWidthDegrees / 1000;
           const yFactor = dataHeightDegrees / 700;
           const factor = Math.min(xFactor, yFactor);
-          query.params["maxAllowableOffset"] = factor * 0.1;
+          (query.params as any)["maxAllowableOffset"] = factor * 0.1;
         } else {
-          query.params["maxAllowableOffset"] = maxAllowableOffsetDegrees;
+          (query.params as any)["maxAllowableOffset"] = maxAllowableOffsetDegrees;
         }
       }
       return query;
