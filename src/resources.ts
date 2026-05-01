@@ -59,14 +59,16 @@ export const hexColourRegex =
   
 export const gss_regex = "^[EWSN][0-9]{8}$";
 
-// SAS token expires 12/7/2026
 /**
- * The URL for the CSV file containing the current ArcGIS Service URLs on the government / ONS Geoportal to be used for polygon geocoding of GSS codes
+ * The URL for the CSV file containing the current ArcGIS Service URLs on the government / ONS Geoportal to be used for polygon geocoding of GSS codes.
+ * This is generated via some python scripts which are manually run and search the geoportal (=ArcGIS hub) for updated service URLs, arrange them into a 
+ * CSV, and then format that into a JSON file which is available online at the URL below.
+ * When compiled the visual has a version of this file within it as a fallback, but by default it will attempt to fetch the most up to date version 
+ * from the URL below so that it can use any new services which have been added to the geoportal since the visual was built (as ONS regularly add 
+ * new services with new URLs and sometimes new identifier column names which we need to be able to use in order for the polygon geocoding 
+ * to work for all GSS codes).
  */
-export const service_urls_url = 
-  "https://gdisquadstorage.file.core.windows.net/os-powerbi-visual-storage/service_urls.json?sv=2022-11-02&ss=bfqt&srt=o&sp=r&se=2026-07-12T20:02:36Z&st=2024-07-12T12:02:36Z&spr=https&sig=UZRNlmjaZd4lQpuHeX5iqVCth3xXjzKXrV3Ebqh5eH8%3D"
-export const internal_boundaryline_url = 
- "https://osvm1764.ordsvy.gov.uk:6443/arcgis/rest/services/Hosted/powerbi_boundaries/FeatureServer/4";
+export const service_urls_url = "https://github.com/OrdnanceSurvey/os-powerbi-map/raw/refs/heads/main/src/service_urls.json"
 
 export const postcodeUrl = "https://os-powerbi-api.azurewebsites.net/postcodes";
 export const uprnUrl = "https://os-powerbi-api.azurewebsites.net/uprns";

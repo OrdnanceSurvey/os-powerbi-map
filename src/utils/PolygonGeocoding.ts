@@ -1,5 +1,4 @@
 "use strict";
-import { internal_boundaryline_url } from "../resources";
 import L, { LatLngBounds } from "leaflet";
 import * as esri from "esri-leaflet";
 import { createHash } from "./utils";
@@ -8,7 +7,6 @@ import { GSSServiceDetails } from "../types/geocoding-types";
 import { GeocodeTypes, GeocodeMetrics, IdentifierParseResults, GeojsonFeatureDictionary, BoundedFeatureGeocodingResult, EsriQueryCheckResult, GeocodeParams } from "../types/geocoding-types"
 import { removeNullsAndZero, cleanStringIdentifiers, restoreOriginalIdentifierKeys, restoreOriginalIdentifiers, GSS_CHECKER } from "./Geocode_Utils"
 import { GeoportalServiceManager } from "./GeoportalServiceManager";
-import { assert } from "console";
 
 
 /**
@@ -20,8 +18,6 @@ export class PolygonGeocoder {
   UIManager: OSPowerBIUIManager;
   /** Local cache of geocoded polygon results, keyed by cleaned identifier. */
   cache: GeojsonFeatureDictionary;
-  /** Default service URL for boundary line queries. */
-  serviceUrl: string = internal_boundaryline_url;
   /** Maximum allowable offset in degrees for geometry simplification. */
   maxAllowableOffsetDegrees: number;
   /** Lookup table mapping GSS code prefixes to service details. */
@@ -364,7 +360,7 @@ export class PolygonGeocoder {
       else {
         //console.log("Geocoding data fully cached! Reusing bounds and features");
         // this implies that all data are the same so we will not be fetching any, check it's so
-        assert(parsedIdentifiers.toFetch.length === 0);
+        console.assert(parsedIdentifiers.toFetch.length === 0, "Expected no features to fetch when input was previously seen");
       }
       totalBounds = this.previousInputBounds[parsedIdentifiers.inputHash]
 

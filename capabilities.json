@@ -491,9 +491,13 @@
             "essential": true,
             "parameters": [ "https://*.os.uk", "https://gdisquadstorage.blob.core.windows.net", "https://localhost:8080",
             "https://gdisquadstorage.file.core.windows.net", "https://os-powerbi-api.azurewebsites.net", 
-            "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://*.ordsvy.gov.uk:6443", 
+            "https://fonts.googleapis.com", "https://fonts.gstatic.com", 
             "https://epsg.io",
-            "https://*.arcgis.com", "http://localhost:20000", "https://*.in.applicationinsights.azure.com/v2/track","https://js.monitor.azure.com", "https://www.ordnancesurvey.co.uk/*", "https://forms.office.com/e/*", "https://forms.cloud.microsoft/e/*", "https://localhost:8080", "https://api.github.com/repos/OrdnanceSurvey/os-powerbi-map/releases/latest", "https://github.com/OrdnanceSurvey/os-powerbi-map"
+            "https://*.arcgis.com", "http://localhost:20000", "https://*.in.applicationinsights.azure.com/v2/track","https://js.monitor.azure.com", 
+             "https://www.ordnancesurvey.co.uk/*", "https://forms.office.com/e/*", "https://forms.cloud.microsoft/e/*", 
+             "https://api.github.com/repos/OrdnanceSurvey/os-powerbi-map/releases/latest", 
+             "https://github.com/OrdnanceSurvey/os-powerbi-map/raw/refs/heads/main/src/service_urls.json"
+             
             ]
         },
         {
