@@ -7,7 +7,6 @@ import { GSSServiceDetails } from "../types/geocoding-types";
 import { GeocodeTypes, GeocodeMetrics, IdentifierParseResults, GeojsonFeatureDictionary, BoundedFeatureGeocodingResult, EsriQueryCheckResult, GeocodeParams } from "../types/geocoding-types"
 import { removeNullsAndZero, cleanStringIdentifiers, restoreOriginalIdentifierKeys, restoreOriginalIdentifiers, GSS_CHECKER } from "./Geocode_Utils"
 import { GeoportalServiceManager } from "./GeoportalServiceManager";
-import { assert } from "console";
 
 
 /**
@@ -361,7 +360,7 @@ export class PolygonGeocoder {
       else {
         //console.log("Geocoding data fully cached! Reusing bounds and features");
         // this implies that all data are the same so we will not be fetching any, check it's so
-        assert(parsedIdentifiers.toFetch.length === 0);
+        console.assert(parsedIdentifiers.toFetch.length === 0, "Expected no features to fetch when input was previously seen");
       }
       totalBounds = this.previousInputBounds[parsedIdentifiers.inputHash]
 
