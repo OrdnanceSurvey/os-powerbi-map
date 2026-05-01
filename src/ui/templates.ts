@@ -348,8 +348,8 @@ const Templates = {
       </section>
 
       
-      <section id="faqs" class="tabset__panel">
-      
+  <section id="faqs" class="tabset__panel">
+    <p>You can find a full list of FAQs in our <em class="docs-button">Docs</em>.</p>
   <ul class="accordion">
   
    <li class="accordion__dropdown">
@@ -363,7 +363,7 @@ const Templates = {
     <input type="checkbox" checked>
     <i class="accordion__arrow"></i>
     <h2 class="accordion__question">How many 'layers' of points and polygons can I add to my map?</h2>
-    <p class="accordion__answer">The visual supports three layers of data: one points-only layer using either UPRN, Postcode or an X and Y coordinate (BNG or WGS84), one 'Features' layer which could be points, lines, or polygons (or all three if you append your datasets together), and a reference layer (ONS boundaries using GSS codes). The Features layer can use GSS codes, WKT/GeoJSON geometries, or a shapefile/GeoJSON/TopoJSON file. To display both points and feature layers there must be a relationship between your two data tables, e.g. a common attribute. You can do this by going to your Data Model > Manage Relationships + New Relationship. Alternatively you could preprocess your data and append all the datasets you want to visualise into one table.</p>
+    <p class="accordion__answer">The visual supports two data driven layers: one points-only layer using either UPRN, Postcode or an X and Y coordinate (BNG or WGS84), and one 'Features' layer which could be points, lines, or polygons (or all three if you append your datasets together). It also supports a reference layer (ONS boundaries using GSS codes) which isn't linked to the Power BI data model and can't be filtered, so is just used for context. The Features layer can use GSS codes, WKT/GeoJSON geometries, or a shapefile/GeoJSON/TopoJSON file. To display both points and feature layers there must be a relationship between your two data tables, e.g. a common attribute. You can do this by going to your Data Model > Manage Relationships + New Relationship. Alternatively you could preprocess your data and append all the datasets you want to visualise into one table.</p>
   </li>
 
 <li class="accordion__dropdown">
