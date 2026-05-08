@@ -1,10 +1,24 @@
 @startuml
 class OSMapsGeoJson {
+    +fillColour: number|string
+    +opacity: number
+    +size: number
+    +isPoint: boolean
+    +isPolygon: boolean
+    +isLine: boolean
+    +colourValueType: ColourValueTypes
+    +colourSource: string
+    +sizeSource: string
+    +geometryIdentifier: string|number
+    +lockSymbology: boolean
+    +useSafeSelectionColour: boolean
     +updateColour(newColour: string): void
-    +updateOpacity(newopacity: number): void
+    +updateOpacity(newOpacity: number): void
     +updateSize(newSize: number): void
     +updateWeight(newWeight: number): void
     +updateSelectedColour(newColour: string): void
+    +updateSymbol(symbol: SymbolConfiguration): void
+    +clone(): OSMapsGeoJson
     +getPopupHTML(): string
 }
 
@@ -13,12 +27,24 @@ class OSMapsMarkerPoint extends OSMapsGeoJson {
 }
 
 class OSMapsCartographicFeatureCollection {
-    +features: GeoJSON.Feature[]
+    +length: number
     +length_unique_geoms: number
+    +length_unlinked: number
     +isCategorical: boolean
-    +getColourLegendItemDiv(withBorder: boolean = false): HTMLElement
-    +getSizeLegendItemDiv(): HTMLElement
+    +colourScalingType: ColourValueTypes
+    +hasSizeScaling: boolean
+    +hasDuplicateGeometries: boolean
+    +hasONSGeocodes: boolean
+    +suppressDuplicateGeoms: boolean
+    +useSafePointColouring: boolean
+    +useSafePointSelectionColouring: boolean
+    +knownBounds?: LatLngBounds
+    +features: GeoJSON.Feature[]
+    +getColourLegendItemDiv(withBorder?: boolean): HTMLElement
+    +getPointSizeLegendItemDiv(): HTMLElement
+    +getUnmatchedLegendItemDiv(): HTMLElement
     +updateCartoSettings(cartoSettings: LayerCartoSettings): void
+    +updateDefaultSymbolConfig(config: SymbolConfiguration): void
     +pushFeature(newFeature: OSMapsGeoJson): void
     +GeometriesEqual(other: OSMapsCartographicFeatureCollection): boolean
 }

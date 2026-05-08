@@ -5,12 +5,22 @@ class OSMapsDataviewConverter {
 }
 
 class OSMapsGeoJSONBuilder {
-    +buildPointSet(viewModel: OSMapsParsedTable, cartoSettings: LayerCartoSettings, signal: AbortSignal): Promise<{featurecoll: OSMapsCartographicFeatureCollection, isAborted:boolean, logRecords:LogRecord[]}>
-    +buildGeometriedFeatures(viewmodel: OSMapsParsedTable, settings: ParsedCardSettingsWrapper, signal: AbortSignal, updateid: string): Promise<{featurecoll: OSMapsCartographicFeatureCollection, isAborted:boolean, logRecords: LogRecord[]}>
+    +buildPointSet(viewModel: OSMapsParsedTable, cartoSettings: LayerCartoSettings, signal: AbortSignal): Promise<BuildResult>
+    +buildGeometriedFeatures(viewmodel: OSMapsParsedTable, settings: ParsedCardSettingsWrapper, signal: AbortSignal, updateid: string): Promise<BuildResult>
+    +reindexUserDataGeocoder(joinField: string): void
     -initializePolygonGeocoder(): Promise<void>
     -initializePointGeocoder(): void
+    -initializeUserDataGeocoder(joinField: string): void
     -buildGeocodeLogRecord(geocodeMetrics: GeocodeMetrics): LogRecord
 }
+
+note right of OSMapsGeoJSONBuilder
+  BuildResult = {
+    featurecoll: OSMapsCartographicFeatureCollection,
+    isAborted: boolean,
+    logRecords: LogRecord[]
+  }
+end note
 
 class PointGeocoder {
     +geocode(value: string): Promise<any>
@@ -20,6 +30,11 @@ class PolygonGeocoder {
     +geocode(value: string): Promise<any>
 }
 
+class UserDataGeocoder {
+    +geocode(value: string): any
+    +reindex(joinField: string): void
+}
+
 class GeocodeMetrics {
     +addResult(result: any): void
     +getSummary(): any
@@ -27,6 +42,7 @@ class GeocodeMetrics {
 
 OSMapsGeoJSONBuilder --> PointGeocoder
 OSMapsGeoJSONBuilder --> PolygonGeocoder
+OSMapsGeoJSONBuilder --> UserDataGeocoder
 OSMapsGeoJSONBuilder --> GeocodeMetrics
 OSMapsDataviewConverter --> OSMapsGeoJSONBuilder
 @enduml

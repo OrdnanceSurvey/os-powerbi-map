@@ -1,11 +1,14 @@
 @startuml
 class OSPowerBIVisual {
     +update(options: VisualUpdateOptions): Promise<void>
-    +applySelection(selectionHandles: ISelectionId[]): Promise<void>
     +getFormattingModel(): FormattingModel
     +destroy(): void
     +getPersistedSettings(identifier): any
     +persistDataToCard(identifier, results): void
+    +receiveUploadedData(uploadResult: UploadResult): void
+    +sendLogRecord(lr: LogRecord): void
+    +switchOffZPSSwitch(): void
+    +updateKeyStatus(newStatus: string): void
 }
 
 class OSPowerBIUIManager {
@@ -13,24 +16,35 @@ class OSPowerBIUIManager {
     +ToggleMapAttribution(showPopup: boolean): void
     +toggleNotificationDot(on: boolean): void
     +BuildMapAttributionPopup(): void
-    +apiKeyUpdated(updateId: string): Promise<void>
+    +apiKeyUpdated(updateId: string): Promise<boolean>
     +addDevMessage(msg: string): void
+    +addWarning(msg: string): void
     +addError(msg: string): void
     +setUnauthorisedAlert(): void
     +displayAuthInfo(details: any): void
-    +updateMapCanRender(): void
-    +SetViewOrEditMode(mode: string): void
+    +updateMapCanRender(): boolean
+    +SetViewOrEditMode(mode: ViewMode): void
+    +ToggleDebugMode(showDebug: boolean, showDev: boolean): void
+    +ToggleUserDataUploader(show: boolean, hasData?: boolean): void
+    +ToggleNotificationsPopup(turnOn: boolean): void
+    +setSelectability(isFiltered: boolean, zpsChanged: boolean): void
+    +DisplayToastNotification(header: string, text?: string, level?: string): void
+    +displayNewerVersionNotice(latestVersion: string): void
 }
 
 class OSPowerBIMapManager {
     +buildMap(bounds: any): void
-    +buildBaseLayerControl(): Promise<void>
+    +buildBaseLayers(): void
     +toggleVisibility(on: boolean): void
     +clearDataFromMap(layer: any): void
     +renderData(featureCollection: OSMapsCartographicFeatureCollection, layer: any, ...): void
-    +updateReferenceLayers(): void
+    +updateReferenceLayers(): Promise<void>
     +updateSettings(settings: any): void
     +ToggleSpinner(on: boolean): void
+    +updateZoomLimits(): void
+    +toggleLasso(on: boolean): void
+    +toggleZoomPanSelect(on: boolean): void
+    +clearMapSelection(trigger: boolean): void
 }
 
 class LegendManager {
@@ -38,29 +52,61 @@ class LegendManager {
     +updateFeaturesLegend(features: any): void
     +updateSizeLegend(points: any): void
     +updateRefLegend(refLayerManager: any): void
+    +updateUnmatchedLegend(features: any): void
     +setLegendVisibility(show: boolean): void
 }
 
 class SettingsChangeTypes {
-    +ChangeEverything(): void
-    +SetAutozoom(isOn: boolean): void
-    +ShouldRebuildPoints: boolean
-    +ShouldRezoomMap: boolean
-    +ShouldRebuildPolygons: boolean
-    +ShouldRebuildMap: boolean
-    +ShouldUpdateZoomLimits: boolean
-    +ShouldRebuildBaseLayers: boolean
+    +ChangeAll: boolean
     +AnySetting: boolean
     +AnyData: boolean
+    +ShouldRebuildMap: boolean
+    +ShouldRebuildBaseLayers: boolean
+    +ShouldRebuildPoints: boolean
+    +ShouldRebuildFeatures: boolean
+    +ShouldRezoomMap: boolean
+    +ShouldUpdateZoomLimits: boolean
+    +ShouldUpdateReferenceFeatures: boolean
+    +PointLocations: boolean
+    +PointAttribs: boolean
+    +PolygonLocations: boolean
+    +PolygonAttribs: boolean
+    +PointCartoSettings: boolean
+    +FeatureCartoSettings: boolean
+    +ZoomPanSelectStatus: boolean
+    +APIKey: boolean
+    +UploadToggle: boolean
+    +UploadJoinField: boolean
 }
 
 class VisualStatus {
-    +GetStatusMessage(): string
+    +anyDataShowing: boolean
+    +keyStatus: string
+    +apiKey: string
+    +previousDataExpected: boolean
+    +previousExtentValid: boolean
+}
+
+class VisualAuth {
+    +IsAuthorised(): Promise<boolean>
+    +AuthDetails(): Promise<any>
+}
+
+interface LogWriter {
+    +sendLogRecord(lr: LogRecord): void
+}
+
+class UserDataUploaderUIController {
+    +showUploaderUI(hasData: boolean): void
+    +hideUploaderUI(): void
 }
 
 OSPowerBIVisual --> OSPowerBIUIManager
 OSPowerBIVisual --> SettingsChangeTypes
 OSPowerBIVisual --> VisualStatus
+OSPowerBIVisual --> VisualAuth
+OSPowerBIVisual ..|> LogWriter
 OSPowerBIUIManager --> OSPowerBIMapManager
 OSPowerBIUIManager --> LegendManager
+OSPowerBIUIManager --> UserDataUploaderUIController
 @enduml
