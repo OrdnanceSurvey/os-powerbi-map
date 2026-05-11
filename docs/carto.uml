@@ -14,7 +14,7 @@ interface IterativeScaler {
 }
 
 interface ColourScaler {
-    +getColourForValue(val: number|string): string
+    +getColourForValue(val: number): string
     +getDefaultColour(): string
     +updateOutputColourRamp(newRange: [string, string]): void
     +hasNullValues: boolean
@@ -23,7 +23,7 @@ interface ColourScaler {
 }
 
 interface LegendGenerator {
-    +getLegendEntriesDiv(namestring: string, opacity?: number, withBorder?: boolean): HTMLElement
+    +getLegendEntriesDiv(options: LegendSymbolOverrides): HTMLElement
 }
 
 class NumericLinearScaler implements NumericScaler, IterativeScaler {
@@ -34,28 +34,75 @@ class NumericLinearScaler implements NumericScaler, IterativeScaler {
     +pushValue(val: number): void
 }
 
-class NumericPercentClipScaler extends NumericLinearScaler implements NumericScaler, IterativeScaler {
+class NumericPercentClipScaler extends NumericLinearScaler {
     +updateClipPercentage(percentage: number): void
 }
 
 class CategoricalScaler extends NumericPercentClipScaler {
-    +pushCategory(val: string|number): boolean
+    +pushCategory(val: string|number): void
     +n_classes: number
     +has_AllOtherValues: boolean
     +all_categories: string[]
     +getValueForString(stringValue: string): number
 }
 
-class PointSymbolSimulator implements LegendGenerator {
-    +getPointSymbol(colourValue: string | number, sizeValue: number)
-    +setColour(colour: string)
-    +getLegendEntriesDiv(namestring: string): HTMLElement
+class ColourLinearScaler implements ColourScaler, IterativeScaler, LegendGenerator {
+    +getColourForValue(val: number): string
+    +getColourForProportion(prop: number): string
+    +getDefaultColour(): string
+    +updateOutputColourRamp(newRange: [string, string]): void
+    +pushValue(val: number): void
+    +getLegendEntriesDiv(options: LegendSymbolOverrides): HTMLElement
+}
+
+class ColourPercentClipScaler extends ColourLinearScaler {
+    +updateClipPercentage(newPercentage: number): void
+}
+
+class ColourChromaScaler extends ColourPercentClipScaler {
+    +getColourForProportion(prop: number): string
+    +updateOutputColourRamp(newRange: [string, string]): void
+}
+
+class ColourCategoricalScaler extends ColourChromaScaler {
+    +pushCategory(category: string|number): void
+    +getColourForCategory(val: string): string
+    +setUsePresetColours(presetType: PresetColourPalettes): void
+    +getLegendEntriesDiv(options: LegendSymbolOverrides): HTMLElement
+}
+
+enum PresetColourPalettes {
+    PAIRED
+    SET3
+    CUBEHELIX
+    NOTUSED
+}
+
+class ScaledSizePointSymbolSimulator implements LegendGenerator {
+    +setColour(colour: string): void
+    +getLegendEntriesDiv(options: LegendSymbolOverrides): HTMLElement
+}
+
+class ConfiguredSymbolSimulator implements LegendGenerator {
+    +HasPolygons: boolean
+    +HasLines: boolean
+    +HasPoints: boolean
+    +updateSymbolConfig(symbolConfig: SymbolConfiguration): void
+    +getLegendEntriesDiv(options: LegendSymbolOverrides): HTMLElement
 }
 
 NumericLinearScaler ..|> NumericScaler
-NumericPercentClipScaler ..|> NumericScaler
-NumericPercentClipScaler ..|> IterativeScaler
+NumericLinearScaler ..|> IterativeScaler
 NumericPercentClipScaler --|> NumericLinearScaler
 CategoricalScaler --|> NumericPercentClipScaler
-PointSymbolSimulator ..|> LegendGenerator
+ColourLinearScaler ..|> ColourScaler
+ColourLinearScaler ..|> IterativeScaler
+ColourLinearScaler ..|> LegendGenerator
+ColourPercentClipScaler --|> ColourLinearScaler
+ColourChromaScaler --|> ColourPercentClipScaler
+ColourCategoricalScaler --|> ColourChromaScaler
+ColourCategoricalScaler --> CategoricalScaler
+ColourCategoricalScaler --> PresetColourPalettes
+ScaledSizePointSymbolSimulator ..|> LegendGenerator
+ConfiguredSymbolSimulator ..|> LegendGenerator
 @enduml
