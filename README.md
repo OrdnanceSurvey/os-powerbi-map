@@ -17,9 +17,9 @@ To get started, download the visual .pbiviz file from [Releases](https://github.
 
 ## Contributing
 
-We welcome contributions from the community via issues and pull requests. The repo is maintained by a team of 2 developers in addition to our normal work but we will try our best to support in a timely manner.
+We welcome contributions from the community via issues and pull requests. The repo is maintained by a team of 2 developers in addition to our normal work but we will try our best to support in a timely manner. Find more details on how to contribute [here](https://github.com/OrdnanceSurvey/os-powerbi-map/wiki/Contributing). We have also documented further information such as our design philosophy, the visual architecture and technical decisions in the [repo wiki](https://github.com/OrdnanceSurvey/os-powerbi-map/wiki).
 
-### Developing locally
+### Quick Start to Develop Locally
 
 - To develop this custom visual you will need to have Node.js installed and enable Developer mode in Power BI. You can learn more about how to set up your environment [here](https://learn.microsoft.com/en-us/power-bi/developer/visuals/environment-setup).
 - To get the dev version of the visual up and running, run:
@@ -28,3 +28,5 @@ We welcome contributions from the community via issues and pull requests. The re
 - If the visual doesn't show up, go to localhost (e.g. https://localhost:8080/) -> if it's 'unsafe' click through to continue anyway -> then go to /assets. If you now refresh the visual, it should be visible in Power BI.
 - To create a build, run:
     - `pbiviz package`
+
+See the repo wiki for more information.
