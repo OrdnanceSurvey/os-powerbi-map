@@ -2,20 +2,26 @@
  * Represents a single log record for the visual, capturing session, API, and metric details.
  */
 export class LogRecord {
+    /// Global-level things on the log record, to be set by the visual whne sending the record 
     /** Unique session identifier for the log record. */
     public sessionId: string;
-    /** Timestamp of when the log was created. */
-    public logTime: Date;
     /** The API key in use when the log was created. */
     public apiKey: string;
-    /** The main log entry payload (can be any type). */
-    public logEntry: any;
     /** Whether the visual was in edit mode when the log was created. */
     public isEditMode: boolean;
-    /** The type of metric/event being logged. */
-    public metric: LogRecordTypes;
+    /** The version number of the visual */
+    public version: string;
     /** The update identifier for the log record. */
     public updateId: string;
+
+    /// Log entry details, to be set by the log creator
+    /** Timestamp of when the log was created. */
+    public logTime: Date;
+    /** The main log entry payload (can be any type). */
+    public logEntry: any;
+    /** The type of metric/event being logged. */
+    public metric: LogRecordTypes;
+    
 }
 
 /**

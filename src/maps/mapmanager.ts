@@ -239,12 +239,8 @@ export class OSPowerBIMapManager {
   sendLog(){
     let logData = this.getLogData();
     let logRecord: LogRecord = new LogRecord();
-    //logRecord.sessionId = this.hostVisual.sessionId;
-    logRecord.updateId = null;
     logRecord.metric = LogRecordTypes.MAP_REQUEST;
-    logRecord.apiKey = this.settings.mapSettingsCard.apiKey;
     logRecord.logTime = new Date();
-    logRecord.isEditMode = this.UIManager.isEditMode;
     logRecord.logEntry = logData;
     this.hostVisual.sendLogRecord(logRecord);
   }

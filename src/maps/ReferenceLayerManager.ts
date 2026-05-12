@@ -259,8 +259,6 @@ export class OSPowerBIReferenceLayerManager implements LegendGenerator {
     logRecord.metric = LogRecordTypes.REFERENCE_LAYER;
     logRecord.logTime = new Date();
     logRecord.logEntry = allGeocodeMetrics;
-    logRecord.isEditMode = this.UIManager.isEditMode;
-    logRecord.apiKey = this.UIManager.visual.formattingSettings.apiKey;
     this.UIManager.visual.sendLogRecord(logRecord)
   }
 

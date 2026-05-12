@@ -329,7 +329,7 @@ export class OSPowerBIUIManager {
    * Handles API key updates. Saves the new status and triggers relevant UI updates.
    * @param updateId The update identifier.
    */
-  public async apiKeyUpdated(updateId: string):Promise<boolean> {
+  public async apiKeyUpdated():Promise<boolean> {
     let newStatus: "free" | "premium" | "invalid";
     let statusChanged: boolean = false;
     if (this.visual.formattingSettings.apiKey.length === 0) {
@@ -363,25 +363,26 @@ export class OSPowerBIUIManager {
             );
             break;
         }
-        if (updateId) { this.logApiKey(updateId, newStatus) }
+        this.logApiKeyChange(newStatus) 
     }
     return statusChanged;
   }
 
   /**
    * Logs API key usage.
-   * @param updateId The update identifier.
+   * @param newStatus The new API key status.
    */
-  private logApiKey(updateId:string, newStatus: "free" | "premium" | "invalid"){
+  private logApiKeyChange(newStatus: "free" | "premium" | "invalid"){
     let logData = {
       keyStatus: newStatus
     };
     let logRecord: LogRecord = new LogRecord();
-    logRecord.updateId = updateId;
     logRecord.metric = LogRecordTypes.API_KEY_CHANGE;
+    // this isn't actually necessary as the log record will be sent immediately and so the 
+    // current apikey from the visual can be used (will be populated on send), but it is cleaner 
+    // to set them here to make it clear what values are being used for the log record
     logRecord.apiKey = this.visual.formattingSettings.apiKey;
     logRecord.logTime = new Date();
-    logRecord.isEditMode = this.isEditMode;
     logRecord.logEntry = logData;
     this.sendLogRecord(logRecord);
   }
