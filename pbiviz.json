@@ -4,7 +4,7 @@
         "displayName": "OS Power BI Map Visual",
         "guid": "oSMaps455D1584AE894DF6B26F87D8DED2142B",
         "visualClassName": "OSPowerBIVisual",
-        "version": "1.0.0.1",
+        "version": "1.0.0.2",
         "description": "OS PowerBI Custom Visual",
         "supportUrl": "https://github.com/OrdnanceSurvey/os-powerbi-map",
         "gitHubUrl": "https://github.com/OrdnanceSurvey/os-powerbi-map"
