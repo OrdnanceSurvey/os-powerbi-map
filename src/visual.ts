@@ -93,7 +93,8 @@ export class OSPowerBIVisual implements IVisual {
     keyStatus: "not_determined",
     previousDataExpected: false,
     previousExtentValid: false,
-    apiKey: ""
+    apiKey: "",
+    currentUpdateId: null
   }
   /** Tracks update events and their timestamps. */
   private updateLog: Record<string, Date>;
@@ -159,7 +160,6 @@ export class OSPowerBIVisual implements IVisual {
     this.checkPermission();
     this.updateLog = {};
     const lr = new LogRecord();
-    lr.sessionId = this.sessionId;
     lr.metric = LogRecordTypes.VISUAL_LOAD;
     lr.logTime = new Date();
     this.sendLogRecord(lr);
@@ -290,6 +290,7 @@ export class OSPowerBIVisual implements IVisual {
   public async update(options: VisualUpdateOptions) {
     this.events.renderingStarted(options);
     const updateId = uuidv4();
+    this.currentStatus.currentUpdateId = updateId;
     const startDate = new Date();
     this.UIManager.addDevMessage(`Update called at ${startDate.toISOString()}, id is ${updateId}`)
     this.updateLog[updateId] = startDate;
@@ -311,6 +312,7 @@ export class OSPowerBIVisual implements IVisual {
     if(!this.isAuthorised){
       this.UIManager.addDevMessage(`Not authorised: update ${updateId} cancelled`);
       this.events.renderingFailed(options);
+      this.currentStatus.currentUpdateId = null;
       return;
     }
     
@@ -329,6 +331,7 @@ export class OSPowerBIVisual implements IVisual {
       if(this.currentStatus.anyDataShowing){
         this.UIManager.addDevMessage(`Update ${updateId} done at ${new Date().toISOString()} - skipped`)
         this.events.renderingFinished(options);
+        this.currentStatus.currentUpdateId = null;
         return;
       }
       else{
@@ -377,6 +380,7 @@ export class OSPowerBIVisual implements IVisual {
         selector: null
       }
       this.host.persistProperties({merge:[persistObj]});
+      this.currentStatus.currentUpdateId = null;
       return;
     }
     this.uploadJustToggledOn = false;
@@ -385,7 +389,7 @@ export class OSPowerBIVisual implements IVisual {
       this.UIManager.addDevMessage(`Update ${updateId} - API key changed, awaiting apikey check`);
       // we use await for this check because we don't want update to proceed if api key is not valid, 
       // i.e. we want updateMapCanRender to give the right result below
-      await this.UIManager.apiKeyUpdated(updateId);
+      await this.UIManager.apiKeyUpdated();
       this.currentStatus.apiKey = this.formattingSettings.apiKey;
     }
 
@@ -393,6 +397,7 @@ export class OSPowerBIVisual implements IVisual {
     if(!mapCanRender) {
       this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - map can't render`)
       this.events.renderingFinished(options);
+      this.currentStatus.currentUpdateId = null;
       return;
     };
     
@@ -453,7 +458,8 @@ export class OSPowerBIVisual implements IVisual {
     this.UIManager.legendManager.setLegendVisibility(newSettingsWrapper.mapSettingsCard.showLegend);
     if (!isFirstUpdate && !(options.type & powerbi.VisualUpdateType.Data)) {
       this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - not a data update (type ${options.type})`)
-      this.events.renderingFinished(options);
+      this.events.renderingFinished(options); 
+      this.currentStatus.currentUpdateId = null;
       return;
     }
 
@@ -509,6 +515,7 @@ export class OSPowerBIVisual implements IVisual {
           this.UIManager.addDevMessage(`${JSON.stringify(options.dataViews[0].table||
             `Table not present in dataview! Update type ${options.type}`, null, 2)}`)
           this.events.renderingFinished(options);
+          this.currentStatus.currentUpdateId = null;
           return;
         }
         this.controlsVisibility.featureJoinFieldname = newDataTable.geojsonRefFieldname;
@@ -526,6 +533,7 @@ export class OSPowerBIVisual implements IVisual {
         const pointBuildLogs = pointRes.logRecords;
         if(pointBuildIsAborted){
           this.UIManager.addDevMessage(`Update ${updateId} - aborted while building points set at ${new Date().toISOString()}`);
+          this.currentStatus.currentUpdateId = null;
           return;
         }
         if (newPointSet.length === 0) {
@@ -550,8 +558,6 @@ export class OSPowerBIVisual implements IVisual {
           whatChanged.PointAttribs = true;
           for(let lr of pointBuildLogs){
             lr.updateId = updateId;
-            lr.apiKey = this.formattingSettings.apiKey
-            lr.isEditMode = this.UIManager.isEditMode;
             this.sendLogRecord(lr)
           }
         } 
@@ -573,6 +579,7 @@ export class OSPowerBIVisual implements IVisual {
         const featureBuildLogs = featureRes.logRecords;
         if(featureBuildIsAborted){
           this.UIManager.addDevMessage(`Update ${updateId} aborted while building feature set at ${new Date().toISOString()}`);
+          this.currentStatus.currentUpdateId = null;
           return;
         }
         if (newPolygonSet.length === 0) {
@@ -594,8 +601,6 @@ export class OSPowerBIVisual implements IVisual {
           whatChanged.PolygonAttribs = true;
           for(let lr of featureBuildLogs){
             lr.updateId = updateId;
-            lr.apiKey = this.formattingSettings.apiKey;
-            lr.isEditMode = this.UIManager.isEditMode;
             this.sendLogRecord(lr)
           }
         } 
@@ -732,6 +737,7 @@ export class OSPowerBIVisual implements IVisual {
     this.formattingSettings.updateControlsDisplay(this.controlsVisibility);
     this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - complete`);
     this.events.renderingFinished(options);
+    this.currentStatus.currentUpdateId = null;
   }
  
   /**
@@ -740,6 +746,18 @@ export class OSPowerBIVisual implements IVisual {
    */
   public sendLogRecord(lr: LogRecord) {
     lr.sessionId = this.sessionId;
+    if(!lr.apiKey){
+      lr.apiKey = this.currentStatus.apiKey;
+    }
+    if(!lr.isEditMode){
+      lr.isEditMode = this.UIManager.isEditMode;
+    }
+    if(!lr.version){
+      lr.version = visualVersion;
+    }
+    if(!lr.updateId){
+      lr.updateId = this.currentStatus.currentUpdateId;
+    }
     this.logWriter.sendLogRecord(lr);
     //console.log("Log Record sent: ",lr);
   }

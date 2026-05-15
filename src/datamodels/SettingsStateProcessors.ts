@@ -159,6 +159,7 @@ export type ControlDisplayStatus = {
 }
 
 export type VisualStatus = {
+  currentUpdateId: string;
   /** Indicates if any data is currently displayed. */
   anyDataShowing: boolean;
   keyStatus: "free" | "premium" | "invalid" | "not_determined";
