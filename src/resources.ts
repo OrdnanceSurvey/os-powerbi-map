@@ -68,7 +68,7 @@ export const gss_regex = "^[EWSN][0-9]{8}$";
  * new services with new URLs and sometimes new identifier column names which we need to be able to use in order for the polygon geocoding 
  * to work for all GSS codes).
  */
-export const service_urls_url = "https://github.com/OrdnanceSurvey/os-powerbi-map/raw/refs/heads/main/src/service_urls.json"
+export const service_urls_url = "https://raw.githubusercontent.com/OrdnanceSurvey/os-powerbi-map/refs/heads/main/src/service_urls.json"
 
 export const postcodeUrl = "https://os-powerbi-api.azurewebsites.net/postcodes";
 export const uprnUrl = "https://os-powerbi-api.azurewebsites.net/uprns";

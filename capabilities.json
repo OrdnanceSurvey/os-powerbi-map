@@ -496,7 +496,7 @@
             "https://*.arcgis.com", "http://localhost:20000", "https://*.in.applicationinsights.azure.com/v2/track","https://js.monitor.azure.com", 
              "https://www.ordnancesurvey.co.uk/*", "https://forms.office.com/e/*", "https://forms.cloud.microsoft/e/*", 
              "https://api.github.com/repos/OrdnanceSurvey/os-powerbi-map/releases/latest", 
-             "https://github.com/OrdnanceSurvey/os-powerbi-map/raw/refs/heads/main/src/service_urls.json"
+             "https://raw.githubusercontent.com/OrdnanceSurvey/os-powerbi-map/refs/heads/main/src/service_urls.json"
              
             ]
         },

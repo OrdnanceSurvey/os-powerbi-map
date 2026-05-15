@@ -26,32 +26,6 @@
     "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Output_Areas_2021_EW_BGC_V2/FeatureServer/0"
   },
   {
-    "Prefix": "S00",
-    "Status": "Current",
-    "Entity": "Census Output Area (OA)",
-    "Source": "ONS",
-    "Code Field": "OA21CD",
-    "Country": "Scotland",
-    "Example Value": "E00000013",
-    "N_Features": 188880,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Output_Areas_2021_EW_BFE_V9/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Output_Areas_2021_EW_BGC_V2/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Output_Areas_2021_EW_BGC_V2/FeatureServer/0"
-  },
-  {
-    "Prefix": "N00",
-    "Status": "Current",
-    "Entity": "Census Output Area (OA)",
-    "Source": "ONS",
-    "Code Field": "OA21CD",
-    "Country": "Northern Ireland",
-    "Example Value": "E00000013",
-    "N_Features": 188880,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Output_Areas_2021_EW_BFE_V9/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Output_Areas_2021_EW_BGC_V2/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Output_Areas_2021_EW_BGC_V2/FeatureServer/0"
-  },
-  {
     "Prefix": "E01",
     "Status": "Current",
     "Entity": "Lower layer Super Output Area (LSOA)",
@@ -186,39 +160,52 @@
     "Status": "Current",
     "Entity": "Unitary Authority",
     "Source": "BoundaryLine",
-    "Code Field": "CTYUA24CD",
+    "Code Field": "CTYUA25CD",
     "Country": "England",
     "Example Value": "W06000001",
     "N_Features": 218,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0"
   },
   {
     "Prefix": "W06",
     "Status": "Current",
     "Entity": "Unitary Authority",
     "Source": "BoundaryLine",
-    "Code Field": "CTYUA24CD",
+    "Code Field": "CTYUA25CD",
     "Country": "Wales",
     "Example Value": "W06000001",
     "N_Features": 218,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0"
   },
   {
     "Prefix": "S12",
     "Status": "Current",
     "Entity": "Unitary Authority",
     "Source": "BoundaryLine",
-    "Code Field": "CTYUA24CD",
+    "Code Field": "CTYUA25CD",
     "Country": "Scotland",
     "Example Value": "W06000001",
     "N_Features": 218,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0"
+  },
+  {
+    "Prefix": "N09",
+    "Status": "Current",
+    "Entity": "Unitary Authority",
+    "Source": "BoundaryLine",
+    "Code Field": "CTYUA25CD",
+    "Country": "Northern Ireland",
+    "Example Value": "W06000001",
+    "N_Features": 218,
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0"
   },
   {
     "Prefix": "E07",
@@ -238,39 +225,39 @@
     "Status": "Current",
     "Entity": "Metropolitan Borough",
     "Source": "BoundaryLine",
-    "Code Field": "CTYUA24CD",
+    "Code Field": "CTYUA25CD",
     "Country": "England",
     "Example Value": "E08000034",
     "N_Features": 218,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0"
   },
   {
     "Prefix": "E09",
     "Status": "Current",
     "Entity": "London Borough",
     "Source": "BoundaryLine",
-    "Code Field": "CTYUA24CD",
+    "Code Field": "CTYUA25CD",
     "Country": "England",
     "Example Value": "E09000016",
     "N_Features": 218,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0"
   },
   {
     "Prefix": "E10",
     "Status": "Current",
     "Entity": "County",
     "Source": "BoundaryLine",
-    "Code Field": "CTYUA24CD",
+    "Code Field": "CTYUA25CD",
     "Country": "England",
     "Example Value": "E10000017",
     "N_Features": 218,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2024_Boundaries_UK_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC/FeatureServer/0"
   },
   {
     "Prefix": "E11",
@@ -455,32 +442,6 @@
     "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Police_Force_Areas_Dec_2024_EW_BGC/FeatureServer/0"
   },
   {
-    "Prefix": "S23",
-    "Status": "Current",
-    "Entity": "Police Force Areas",
-    "Source": "ONS",
-    "Code Field": "PFA24CD",
-    "Country": "Scotland",
-    "Example Value": "E23000010",
-    "N_Features": 43,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Police_Force_Areas_Dec_2024_EW_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Police_Force_Areas_Dec_2024_EW_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Police_Force_Areas_Dec_2024_EW_BGC/FeatureServer/0"
-  },
-  {
-    "Prefix": "N23",
-    "Status": "Current",
-    "Entity": "Police Force Areas",
-    "Source": "ONS",
-    "Code Field": "PFA24CD",
-    "Country": "Northern Ireland",
-    "Example Value": "E23000010",
-    "N_Features": 43,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Police_Force_Areas_Dec_2024_EW_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Police_Force_Areas_Dec_2024_EW_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Police_Force_Areas_Dec_2024_EW_BGC/FeatureServer/0"
-  },
-  {
     "Prefix": "E26",
     "Status": "Current",
     "Entity": "National Parks",
@@ -637,32 +598,6 @@
     "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Fire_and_Rescue_Authorities_December_2023_EW_BGC/FeatureServer/0"
   },
   {
-    "Prefix": "S38",
-    "Status": "Current",
-    "Entity": "Fire and Rescue Authorities",
-    "Source": "ONS",
-    "Code Field": "FRA23CD",
-    "Country": "Scotland",
-    "Example Value": "E31000008",
-    "N_Features": 47,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Fire_and_Rescue_Authorities_December_2023_EW_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Fire_and_Rescue_Authorities_December_2023_EW_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Fire_and_Rescue_Authorities_December_2023_EW_BGC/FeatureServer/0"
-  },
-  {
-    "Prefix": "N31",
-    "Status": "Current",
-    "Entity": "Fire and Rescue Authorities",
-    "Source": "ONS",
-    "Code Field": "FRA23CD",
-    "Country": "Northern Ireland",
-    "Example Value": "E31000008",
-    "N_Features": 47,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Fire_and_Rescue_Authorities_December_2023_EW_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Fire_and_Rescue_Authorities_December_2023_EW_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Fire_and_Rescue_Authorities_December_2023_EW_BGC/FeatureServer/0"
-  },
-  {
     "Prefix": "E32",
     "Status": "Current",
     "Entity": "London Assembly",
@@ -678,20 +613,20 @@
   {
     "Prefix": "W09",
     "Status": "Current",
-    "Entity": "Welsh Assembly",
+    "Entity": "Welsh Assembly Constituencies",
     "Source": "BoundaryLine",
-    "Code Field": "SENC22CD",
+    "Code Field": "SENC26CD",
     "Country": "Wales",
     "Example Value": "W09000005",
     "N_Features": 40,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Senedd_Cymru_Constituencies_December_2022_Boundaries_WA_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Senedd_Cymru_Constituencies_December_2022_Boundaries_WA_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Senedd_Cymru_Constituencies_December_2022_Boundaries_WA_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/SENC_MAY_2026_WA_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/SENC_MAY_2026_WA_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/SENC_MAY_2026_WA_BGC/FeatureServer/0"
   },
   {
     "Prefix": "W10",
     "Status": "Current",
-    "Entity": "Welsh Assembly",
+    "Entity": "Welsh Assembly Electoral Regions",
     "Source": "ONS",
     "Code Field": "SENER22CD",
     "Country": "Wales",
@@ -706,13 +641,13 @@
     "Status": "Current",
     "Entity": "Scottish Parliament Constituency",
     "Source": "BoundaryLine",
-    "Code Field": "SPC22CD",
+    "Code Field": "SPC26CD",
     "Country": "Scotland",
     "Example Value": "S16000075",
     "N_Features": 73,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Scottish_Parliamentary_Constituencies_December_2022_Boundaries_SC_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Scottish_Parliamentary_Constituencies_December_2022_Boundaries_SC_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Scottish_Parliamentary_Constituencies_December_2022_Boundaries_SC_BGC/FeatureServer/0"
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/SPC_MAY_2026_SC_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/SPC_MAY_2026_SC_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/SPC_MAY_2026_SC_BGC/FeatureServer/0"
   },
   {
     "Prefix": "E33",
@@ -734,32 +669,6 @@
     "Source": "ONS",
     "Code Field": "wz11cd",
     "Country": "Wales",
-    "Example Value": "E33000005",
-    "N_Features": 53578,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Workplace_Zones_Dec_2011_FEB_in_England_and_Wales_2022/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Workplace_Zones_Dec_2011_GCB_in_England_and_Wales_2022/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Workplace_Zones_Dec_2011_GCB_in_England_and_Wales_2022/FeatureServer/0"
-  },
-  {
-    "Prefix": "S34",
-    "Status": "Current",
-    "Entity": "Workplace Zones",
-    "Source": "ONS",
-    "Code Field": "wz11cd",
-    "Country": "Scotland",
-    "Example Value": "E33000005",
-    "N_Features": 53578,
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Workplace_Zones_Dec_2011_FEB_in_England_and_Wales_2022/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Workplace_Zones_Dec_2011_GCB_in_England_and_Wales_2022/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Workplace_Zones_Dec_2011_GCB_in_England_and_Wales_2022/FeatureServer/0"
-  },
-  {
-    "Prefix": "N19",
-    "Status": "Current",
-    "Entity": "Workplace Zones",
-    "Source": "ONS",
-    "Code Field": "wz11cd",
-    "Country": "Northern Ireland",
     "Example Value": "E33000005",
     "N_Features": 53578,
     "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Workplace_Zones_Dec_2011_FEB_in_England_and_Wales_2022/FeatureServer/0",
@@ -1098,10 +1007,11 @@
     "Status": "Current",
     "Entity": "Local Health Boards",
     "Source": "ONS",
-    "Code Field": "SICBL26CD",
+    "Code Field": "LHB23CD",
     "Country": "Wales",
-    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Sub_Integrated_Care_Board_Locations_April_2026_Boundaries_EN_BFE/FeatureServer/0",
-    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Sub_Integrated_Care_Board_Locations_April_2026_Boundaries_EN_BGC/FeatureServer/0",
-    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Sub_Integrated_Care_Board_Locations_April_2026_Boundaries_EN_BGC/FeatureServer/0"
+    "Example Value": "W11000023",
+    "URL_BFE": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Health_Boards_December_2023_WA_BFE/FeatureServer/0",
+    "URL_BGC": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Health_Boards_December_2023_WA_BGC/FeatureServer/0",
+    "URL": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Health_Boards_December_2023_WA_BGC/FeatureServer/0"
   }
 ]
