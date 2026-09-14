@@ -79,6 +79,8 @@ export class OSPowerBIVisual implements IVisual {
   private abortController: AbortController = new AbortController();
   /** Flag to skip the next update cycle. */
   skipNextUpdate: boolean;
+  /** Diagnostic only: id of the update currently awaiting geocoding, so we can see which update aborts which. */
+  private inFlightDataUpdateId: string = null;
   private uploadJustToggledOn: boolean = false;
   private controlsVisibility: ControlDisplayStatus = {
     pointSizingPresent: false,
@@ -342,7 +344,14 @@ export class OSPowerBIVisual implements IVisual {
     const isFirstUpdate = !this.formattingSettings;
     let whatChanged: SettingsChangeTypes = newSettingsWrapper.whatChanged(this.formattingSettings||null);
     this.uploadJustToggledOn = whatChanged.UploadToggle && !this.uploadJustToggledOn;
+    // From this assignment onwards the update has consumed any filter-state transition, whether or not it renders
     this.formattingSettings = newSettingsWrapper;
+    this.UIManager.addDevMessage(
+      `Update ${updateId} - state: type=${options.type}, isFirstUpdate=${isFirstUpdate}, hasData=${updateHasData}, ` +
+      `isFiltered=${newSettingsWrapper.dataviewIsFiltered}, FilterStateToggled=${whatChanged.FilterState}, ` +
+      `ChangeAll=${whatChanged.ChangeAll}, AnySetting=${whatChanged.AnySetting}, ` +
+      `autoZoom=${newSettingsWrapper.mapSettingsCard.autoZoom}`
+    );
 
     this.UIManager.mapManager.updateSettings(newSettingsWrapper);
     this.formattingSettings.updateControlsDisplay(this.controlsVisibility);
@@ -380,6 +389,7 @@ export class OSPowerBIVisual implements IVisual {
         selector: null
       }
       this.host.persistProperties({merge:[persistObj]});
+      this.logUpdateExit(updateId, "upload toggle", whatChanged);
       this.currentStatus.currentUpdateId = null;
       return;
     }
@@ -395,7 +405,7 @@ export class OSPowerBIVisual implements IVisual {
 
     const mapCanRender = this.UIManager.updateMapCanRender();
     if(!mapCanRender) {
-      this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - map can't render`)
+      this.logUpdateExit(updateId, "map can't render", whatChanged);
       this.events.renderingFinished(options);
       this.currentStatus.currentUpdateId = null;
       return;
@@ -457,7 +467,7 @@ export class OSPowerBIVisual implements IVisual {
     this.UIManager.SetViewOrEditMode(options.viewMode);
     this.UIManager.legendManager.setLegendVisibility(newSettingsWrapper.mapSettingsCard.showLegend);
     if (!isFirstUpdate && !(options.type & powerbi.VisualUpdateType.Data)) {
-      this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - not a data update (type ${options.type})`)
+      this.logUpdateExit(updateId, `not a data update (type ${options.type})`, whatChanged);
       this.events.renderingFinished(options); 
       this.currentStatus.currentUpdateId = null;
       return;
@@ -471,8 +481,15 @@ export class OSPowerBIVisual implements IVisual {
     // should not continue with updating the map when they complete. 
     // We then create a new abort controller for the current update and store it on the visual, so that the next update loop
     // can cancel the the results from this one if necessary, etc
+    if (this.inFlightDataUpdateId) {
+      this.UIManager.addDevMessage(
+        `Update ${updateId} - aborting in-flight data update ${this.inFlightDataUpdateId}, ` +
+        `which will therefore not render and has consumed its filter-state transition`
+      );
+    }
     this.abortController.abort();
     this.abortController = new AbortController();
+    this.inFlightDataUpdateId = updateId;
     
     // display a loading spinner if update takes longer than 3s to run
     const startSpinnerTimeoutID = setTimeout(function () {
@@ -510,7 +527,7 @@ export class OSPowerBIVisual implements IVisual {
           this.featuresViewModel = null;
           clearTimeout(startSpinnerTimeoutID);
           this.UIManager.mapManager.ToggleSpinner(false);
-          this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - no data, map cleared`)
+          this.logUpdateExit(updateId, "no data - map cleared", whatChanged);
           // TODO this errors if no dataview
           this.UIManager.addDevMessage(`${JSON.stringify(options.dataViews[0].table||
             `Table not present in dataview! Update type ${options.type}`, null, 2)}`)
@@ -532,7 +549,7 @@ export class OSPowerBIVisual implements IVisual {
         const pointBuildIsAborted = pointRes.isAborted;
         const pointBuildLogs = pointRes.logRecords;
         if(pointBuildIsAborted){
-          this.UIManager.addDevMessage(`Update ${updateId} - aborted while building points set at ${new Date().toISOString()}`);
+          this.logUpdateExit(updateId, "aborted while building points set", whatChanged);
           this.currentStatus.currentUpdateId = null;
           return;
         }
@@ -578,7 +595,7 @@ export class OSPowerBIVisual implements IVisual {
         const featureBuildIsAborted = featureRes.isAborted;
         const featureBuildLogs = featureRes.logRecords;
         if(featureBuildIsAborted){
-          this.UIManager.addDevMessage(`Update ${updateId} aborted while building feature set at ${new Date().toISOString()}`);
+          this.logUpdateExit(updateId, "aborted while building feature set", whatChanged);
           this.currentStatus.currentUpdateId = null;
           return;
         }
@@ -652,6 +669,11 @@ export class OSPowerBIVisual implements IVisual {
       // of adding data to the map: we are just restoring the visual state from when the user left it, so we 
       // should trust that the restored extent is what they want to see rather than zooming to the data and losing that restored view.
       const preventZoomToData = this.currentStatus.previousExtentValid;
+      this.UIManager.addDevMessage(
+        `Update ${updateId} - zoom inputs: PointLocations=${whatChanged.PointLocations}, ` +
+        `PolygonLocations=${whatChanged.PolygonLocations}, FilterStateToggled=${whatChanged.FilterState}, ` +
+        `ShouldRezoomMap=${whatChanged.ShouldRezoomMap}, preventZoomToData=${preventZoomToData}`
+      );
       if (this.pointsViewModel && this.pointsViewModel.length>0) {
         // Use "safe" point symbols iif both layers are present, both layers have categorical data, both layers 
         // have the "use default categorical colours" toggle turned on. 
@@ -735,9 +757,23 @@ export class OSPowerBIVisual implements IVisual {
       this.UIManager.DisplayToastNotification(null);
     }
     this.formattingSettings.updateControlsDisplay(this.controlsVisibility);
+    if (this.inFlightDataUpdateId === updateId) { this.inFlightDataUpdateId = null; }
     this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - complete`);
     this.events.renderingFinished(options);
     this.currentStatus.currentUpdateId = null;
+  }
+
+  /**
+   * Logs an update that is exiting without rendering, and releases its in-flight marker.
+   * Such an update has still consumed any filter-state transition, so the next update won't see it.
+   * @private
+   */
+  private logUpdateExit(updateId: string, reason: string, whatChanged: SettingsChangeTypes) {
+    if (this.inFlightDataUpdateId === updateId) { this.inFlightDataUpdateId = null; }
+    this.UIManager.addDevMessage(
+      `Update ${updateId} - EXIT (${reason}) at ${new Date().toISOString()} - did not render, ` +
+      `filterTransitionConsumed=${whatChanged.FilterState}`
+    );
   }
  
   /**
