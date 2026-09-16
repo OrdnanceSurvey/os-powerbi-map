@@ -33,8 +33,6 @@ export class SettingsChangeTypes {
   PolygonAttribs: boolean = false;
   /** Indicates if zoom/pan/select status has changed. */
   ZoomPanSelectStatus: boolean = false;
-  /** Indicates if the filter state has changed. */
-  FilterState: boolean = false;
   /** Indicates if reference features have changed. */
   ReferenceFeatures: boolean = false;
   UploadJoinField: boolean = false;
@@ -42,8 +40,6 @@ export class SettingsChangeTypes {
   UnmatchedLocalFeatures: boolean = false;
   UploadToggle: boolean = false;
   ChangeAll: boolean = false;
-  /** Internal: Whether autozoom is enabled (not a change flag). */
-  private _AutozoomIsEnabled: boolean = false;
 
   /**
    * Returns true if points should be rebuilt based on current change flags.
@@ -59,12 +55,12 @@ export class SettingsChangeTypes {
     );
   }
   /**
-   * Returns true if the map should be re-zoomed based on current change flags and autozoom status.
+   * Returns true if the set of geometries on the map differs from what was there before.
+   * This is an input to the auto-zoom decision, which is made by the map manager.
    * @returns {boolean}
    */
-  get ShouldRezoomMap(): boolean {
-    if(!this._AutozoomIsEnabled) { return false; }
-    return this.ChangeAll || ((this.PointLocations || this.PolygonLocations) && !this.FilterState);
+  get GeometriesChanged(): boolean {
+    return this.ChangeAll || this.PointLocations || this.PolygonLocations;
   }
   /**
    * Returns true if polygons should be rebuilt based on current change flags.
@@ -140,13 +136,6 @@ export class SettingsChangeTypes {
     this.ChangeAll = true;
     //this.ReferenceFeatures = true;
   }
-  /**
-   * Sets the autozoom enabled status.
-   * @param isOn True to enable autozoom, false to disable.
-   */
-  SetAutozoom(isOn:boolean){
-    this._AutozoomIsEnabled = isOn
-  }
 }
 
 export type ControlDisplayStatus = {
@@ -164,8 +153,6 @@ export type VisualStatus = {
   anyDataShowing: boolean;
   keyStatus: "free" | "premium" | "invalid" | "not_determined";
   apiKey: string;
-  previousDataExpected: boolean;
-  previousExtentValid: boolean;
 }
 
 export enum KeyStatusTypes {
