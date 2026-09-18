@@ -77,9 +77,11 @@ export class MapSettingsCard extends formattingSettings.SimpleCard {
     items: this.autoZoomModeOptions,
     value: this.autoZoomModeOptions[0],
     description:
-      "Controls when the map repositions itself. Once you have panned or zoomed the map, that view is \
-        kept: with the default setting the map will only move on its own if the data would otherwise be \
-        off-screen entirely. Use the 'Zoom to data' button on the map to fit the view to your data at any time."
+      "Controls when the map repositions itself. With the first option, once you have panned or zoomed the map, that view is \
+        kept: the map will only move on its own if the data would otherwise be \
+        off-screen entirely or too small to see clearly. Use the 'Zoom to data' button on the map to fit the \
+        view to your data at any time. \
+        With the second option, the map will always reposition itself to fit the data as you change content."
   });
   /** Superseded by autoZoomMode_UI; read once on load to carry over the setting from older reports. */
   autoZoom_UI = new formattingSettings.ToggleSwitch({

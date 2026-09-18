@@ -61,8 +61,12 @@ export class OSPowerBIMapManager {
   private recentZoomPanCount: number = 0;
   private recentViewedBounds: LoggableBounds = null;
   ONSAttributionShown: boolean = false;
-  /** True once a person has positioned the map; auto-zoom then leaves the extent alone. */
-  public extentIsUserSet: boolean = false;
+  /** True once the extent has been set deliberately - by framing the data, restoring a saved view, or a user gesture - rather than being the default. */
+  public hasFramedData: boolean = false;
+  /** True from restoring a saved extent until data are first rendered onto it, which no auto-zoom rule may override. */
+  private extentIsRestored: boolean = false;
+  /** How many zoom levels smaller than the view the data must be before we read it as a narrowed selection and follow it in. */
+  private readonly NARROWED_ZOOM_LEVELS = 1.5;
   /** Set while we move the map ourselves, so the resulting leaflet events aren't read as a user gesture. */
   private suppressMoveTracking: boolean = false;
   private zoomToDataControl: L.Control;
@@ -182,8 +186,9 @@ export class OSPowerBIMapManager {
     }
     if (initialBounds) {
       this.zoomMapToBounds(initialBounds);
-      // a CRS rebuild reuses the current extent, so must not clear a pin that is already in place
-      this.extentIsUserSet = boundsAreUserSet || this.extentIsUserSet;
+      // a CRS rebuild reuses the current extent, so must not clear a flag that is already in place
+      this.hasFramedData = boundsAreUserSet || this.hasFramedData;
+      this.extentIsRestored = boundsAreUserSet || this.extentIsRestored;
     }
     this.map.off("lasso.finished");
     this.map.on("lasso.finished", this.createLassoHandler());
@@ -196,7 +201,8 @@ export class OSPowerBIMapManager {
     this.map.on("zoomend dragend", ()=> {
       if (this.suppressMoveTracking) { return; }
       // the extent is now the user's, and saving it is what tells the next visual load that it was chosen deliberately
-      this.extentIsUserSet = true;
+      this.hasFramedData = true;
+      this.extentIsRestored = false;
       // we want to log zoom and pan interactions, but not more often than every few seconds, 
       // so we use a timeout to delay logging until the user has stopped interacting for a few seconds, 
       // and if they interact again before that time is up we reset the timer. We track how 
@@ -334,19 +340,21 @@ export class OSPowerBIMapManager {
   }
 
   /**
-   * Fits the map to the rendered data and returns the extent to automatic control.
+   * Fits the map to the rendered data on demand.
    * @returns True if there were data to zoom to.
    */
   public zoomToData(): boolean {
     const dataBounds = this.getRenderedDataBounds();
     if (!dataBounds || !this.zoomMapToBounds(dataBounds)) { return false; }
-    this.extentIsUserSet = false;
+    this.hasFramedData = true;
     return true;
   }
 
   /**
    * Applies the auto-zoom rules once per update, after both data layers have been rendered.
-   * An extent the user chose is kept, unless the data would otherwise be entirely off-screen.
+   * An extent restored from a previous session is honoured as-is for the first render of data onto it.
+   * Thereafter the map follows a selection that moves away or narrows geographically, but never zooms
+   * out to chase one that widens - the zoom-to-data control covers that.
    * @param geometriesChanged Whether the set of geometries on the map differs from last time.
    * @returns A description of the decision, for the dev log.
    */
@@ -358,16 +366,41 @@ export class OSPowerBIMapManager {
     const dataBounds = this.getRenderedDataBounds();
     if (!dataBounds) { return "no - nothing rendered to zoom to"; }
 
-    if (this.extentIsUserSet && mode !== AutoZoomMode.Always) {
-      if (this.map.getBounds().intersects(dataBounds)) { return "no - user set the extent and data are in view"; }
-      this.zoomMapToBounds(dataBounds);
-      // we have overridden the user's view, so the extent goes back to following the data
-      this.extentIsUserSet = false;
-      return "yes - new data were entirely outside the current view";
+    if (this.extentIsRestored) {
+      // the first update after a reload looks like brand new data, but the saved extent is a view the
+      // user already chose, so it wins outright whatever the mode
+      this.extentIsRestored = false;
+      return "no - kept the extent restored from the previous session";
     }
+    if (mode === AutoZoomMode.Always) {
+      this.fitToData(dataBounds);
+      return "yes - set to always follow data";
+    }
+    if (!this.hasFramedData) {
+      this.fitToData(dataBounds);
+      return "yes - first framing of the data";
+    }
+    if (!this.map.getBounds().intersects(dataBounds)) {
+      this.fitToData(dataBounds);
+      return "yes - data are entirely outside the current view";
+    }
+    // a large gain in zoom means the data now sit in a small part of the view, which reads as the user
+    // having narrowed the selection geographically rather than by attribute
+    const zoomGain = this.map.getBoundsZoom(dataBounds) - this.map.getZoom();
+    if (zoomGain >= this.NARROWED_ZOOM_LEVELS) {
+      this.fitToData(dataBounds);
+      return `yes - data now occupy a small part of the view (${zoomGain.toFixed(1)} zoom levels)`;
+    }
+    return `no - data remain in view (${zoomGain.toFixed(1)} zoom levels)`;
+  }
+
+  /**
+   * Moves the map to frame the data.
+   * @private
+   */
+  private fitToData(dataBounds: L.LatLngBounds) {
     this.zoomMapToBounds(dataBounds);
-    this.extentIsUserSet = false;
-    return mode === AutoZoomMode.Always ? "yes - set to always follow data" : "yes - extent was not user-set";
+    this.hasFramedData = true;
   }
 
   /**

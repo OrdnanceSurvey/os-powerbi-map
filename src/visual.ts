@@ -348,7 +348,7 @@ export class OSPowerBIVisual implements IVisual {
       `Update ${updateId} - state: type=${options.type}, isFirstUpdate=${isFirstUpdate}, hasData=${updateHasData}, ` +
       `isFiltered=${newSettingsWrapper.dataviewIsFiltered}, ChangeAll=${whatChanged.ChangeAll}, ` +
       `AnySetting=${whatChanged.AnySetting}, autoZoomMode=${newSettingsWrapper.mapSettingsCard.autoZoomMode}, ` +
-      `extentIsUserSet=${this.UIManager.mapManager.extentIsUserSet}`
+      `hasFramedData=${this.UIManager.mapManager.hasFramedData}`
     );
 
     this.UIManager.mapManager.updateSettings(newSettingsWrapper);
