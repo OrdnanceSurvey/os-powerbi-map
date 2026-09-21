@@ -54,6 +54,22 @@
     margin: 0px !important; 
   }  
   
+  .osmaps-zoom-to-data {
+    border-radius: 50% !important;
+    .box-shadow() !important;
+
+    & a {
+      height: 2.1rem !important;
+      width: 2.1rem !important;
+      border-radius: 50% !important;
+      // leaflet.css loads after this file, so its .leaflet-bar a rules need outranking
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: #000;
+    }
+  }
+
   .leaflet-control-lasso {
     height: 2.1rem !important;
     width: 2.1rem !important;
