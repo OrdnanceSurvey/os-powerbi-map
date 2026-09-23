@@ -14,10 +14,9 @@ To get started, download the visual .pbiviz file from [Releases](https://github.
 - Highly customisable map formatting and styling options
 - Built with security in mind for data protection
 
-
 ## Contributing
 
-We welcome contributions from the community via issues and pull requests. The repo is maintained by a team of 2 developers in addition to our normal work but we will try our best to support in a timely manner. Find more details on how to contribute [here](https://github.com/OrdnanceSurvey/os-powerbi-map/wiki/Contributing). We have also documented further information such as our design philosophy, the visual architecture and technical decisions in the [repo wiki](https://github.com/OrdnanceSurvey/os-powerbi-map/wiki).
+We welcome contributions from the community via issues, discussions, and pull requests. The repo is maintained by a team of 2 developers in addition to our normal work but we will address queries as soon as we are able. **Find more details on how to contribute or ask for help [here](https://github.com/OrdnanceSurvey/os-powerbi-map/wiki/Contributing)**. We have also documented further information such as our design philosophy, the visual architecture and technical decisions in the [repo wiki](https://github.com/OrdnanceSurvey/os-powerbi-map/wiki).
 
 ### Quick Start to Develop Locally
 
