@@ -12,6 +12,7 @@ import LogoWhite from "../images/os-logo-maps-white";
 import { OSMapsCartographicFeatureCollection } from "../datamodels/osmaps-feature-collection";
 import { OSMapsGeoJson } from "../datamodels/osmaps-features";
 import { Layers, ParsedCardSettingsWrapper } from "../settings/PowerBISettings";
+import { AutoZoomMode } from "../settings/map-settings";
 import { OSPowerBIVisual } from "../visual";
 import ISelectionId = powerbi.extensibility.ISelectionId;
 import { OSPowerBIUIManager } from "../ui/uimanager";
@@ -20,6 +21,12 @@ import { ONS_ESRI_ATTRIB, GET_OS_ATTRIB, colours } from "../resources";
 import {LoggingTileLayer} from "./LoggingTileLayer";
 import {LoggableBounds} from "./LoggableBounds";
 import { LogRecord, LogRecordTypes } from "../logging/LoggingTypes";
+
+const ZOOM_TO_DATA_ICON = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+  <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+    d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"/>
+  <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+</svg>`;
 
 /**
  * Manages the Leaflet map instance, layers, and user interactions for the OS Power BI visual.
@@ -54,6 +61,15 @@ export class OSPowerBIMapManager {
   private recentZoomPanCount: number = 0;
   private recentViewedBounds: LoggableBounds = null;
   ONSAttributionShown: boolean = false;
+  /** True once the extent has been set deliberately - by framing the data, restoring a saved view, or a user gesture - rather than being the default. */
+  public hasFramedData: boolean = false;
+  /** True from restoring a saved extent until data are first rendered onto it, which no auto-zoom rule may override. */
+  private extentIsRestored: boolean = false;
+  /** How many zoom levels smaller than the view the data must be before we read it as a narrowed selection and follow it in. */
+  private readonly NARROWED_ZOOM_LEVELS = 1.5;
+  /** Set while we move the map ourselves, so the resulting leaflet events aren't read as a user gesture. */
+  private suppressMoveTracking: boolean = false;
+  private zoomToDataControl: L.Control;
 
 
   /**
@@ -140,8 +156,10 @@ export class OSPowerBIMapManager {
   /**
    * Builds and initializes the Leaflet map.
    * @param initialBounds The initial bounds to zoom to.
+   * @param boundsAreUserSet True if initialBounds came from a view a person chose, in which case the
+   * extent is pinned and auto-zoom will leave it alone.
    */
-  buildMap(initialBounds:L.LatLngBounds): void {
+  buildMap(initialBounds:L.LatLngBounds, boundsAreUserSet: boolean = false): void {
     if (this.layerControl && this.layerControl.remove) {
       this.layerControl.remove();
       this.layerControl = null;
@@ -168,6 +186,9 @@ export class OSPowerBIMapManager {
     }
     if (initialBounds) {
       this.zoomMapToBounds(initialBounds);
+      // a CRS rebuild reuses the current extent, so must not clear a flag that is already in place
+      this.hasFramedData = boundsAreUserSet || this.hasFramedData;
+      this.extentIsRestored = boundsAreUserSet || this.extentIsRestored;
     }
     this.map.off("lasso.finished");
     this.map.on("lasso.finished", this.createLassoHandler());
@@ -178,6 +199,10 @@ export class OSPowerBIMapManager {
       }.bind(this), 3000, e.name);
     });
     this.map.on("zoomend dragend", ()=> {
+      if (this.suppressMoveTracking) { return; }
+      // the extent is now the user's, and saving it is what tells the next visual load that it was chosen deliberately
+      this.hasFramedData = true;
+      this.extentIsRestored = false;
       // we want to log zoom and pan interactions, but not more often than every few seconds, 
       // so we use a timeout to delay logging until the user has stopped interacting for a few seconds, 
       // and if they interact again before that time is up we reset the timer. We track how 
@@ -212,6 +237,34 @@ export class OSPowerBIMapManager {
 
       this.map.createPane("referenceOverlays");
       this.map.getPane("referenceOverlays").style.zIndex = '450';
+      this.zoomToDataControl = this.buildZoomToDataControl();
+      this.zoomToDataControl.addTo(this.map);
+  }
+
+  /**
+   * Builds the map control that fits the view to the rendered data on demand.
+   * @private
+   */
+  private buildZoomToDataControl(): L.Control {
+    const control = new L.Control({ position: "topleft" });
+    control.onAdd = () => {
+      const container = L.DomUtil.create("div", "leaflet-bar leaflet-control osmaps-zoom-to-data");
+      const button = L.DomUtil.create("a", "", container) as HTMLAnchorElement;
+      button.href = "#";
+      button.title = "Zoom to data";
+      button.setAttribute("role", "button");
+      button.setAttribute("aria-label", "Zoom the map to fit the data");
+      button.innerHTML = ZOOM_TO_DATA_ICON;
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.on(button, "click", (e) => {
+        L.DomEvent.stop(e);
+        if (!this.zoomToData()) {
+          this.UIManager.addWarning("There are no mapped data to zoom to.", "zoomToDataEmpty");
+        }
+      });
+      return container;
+    };
+    return control;
   }
 
   /**
@@ -246,16 +299,108 @@ export class OSPowerBIMapManager {
   }
 
   /**
-   * Zooms the map to the specified bounds.
+   * Moves the map to the specified bounds without treating the move as a user gesture.
+   * Uses a non-animated fit so that leaflet's move events fire before the suppression is lifted.
    * @param bounds The bounds to zoom to.
+   * @returns True if the map was moved.
    */
-  zoomMapToBounds(bounds:L.LatLngBounds){
+  zoomMapToBounds(bounds:L.LatLngBounds): boolean {
+    if (!this.map || !bounds) { return false; }
+    this.suppressMoveTracking = true;
     try{
-      this.map.fitBounds(bounds); // hacky but it works
+      this.map.fitBounds(bounds, { animate: false });
+      return true;
     }
     catch(error){
-      //console.log("Previous bounds invalid")
+      return false;
     }
+    finally{
+      this.suppressMoveTracking = false;
+    }
+  }
+
+  /**
+   * Returns the combined bounds of everything currently rendered on the data layers, or null if
+   * nothing is rendered.
+   * @private
+   */
+  private getRenderedDataBounds(): L.LatLngBounds {
+    const layers: [L.Proj.GeoJSON, OSMapsCartographicFeatureCollection][] = [
+      [this.leafletPointsLayer, this.pointsCollection],
+      [this.leafletFeaturesLayer, this.featuresCollection]
+    ];
+    let combined: L.LatLngBounds = null;
+    for (const [leafletLayer, collection] of layers) {
+      if (!leafletLayer) { continue; }
+      const bounds = collection?.knownBounds || leafletLayer.getBounds();
+      if (!bounds || !bounds.isValid()) { continue; }
+      combined = combined ? combined.extend(bounds) : L.latLngBounds(bounds.getSouthWest(), bounds.getNorthEast());
+    }
+    return combined;
+  }
+
+  /**
+   * Fits the map to the rendered data on demand.
+   * @returns True if there were data to zoom to.
+   */
+  public zoomToData(): boolean {
+    const dataBounds = this.getRenderedDataBounds();
+    if (!dataBounds || !this.zoomMapToBounds(dataBounds)) { return false; }
+    this.hasFramedData = true;
+    return true;
+  }
+
+  /**
+   * Applies the auto-zoom rules once per update, after both data layers have been rendered.
+   * An extent restored from a previous session is honoured as-is for the first render of data onto it.
+   * Thereafter the map follows a selection that moves away or narrows geographically, but never zooms
+   * out to chase one that widens - the zoom-to-data control covers that.
+   * @param geometriesChanged Whether the set of geometries on the map differs from last time.
+   * @returns A description of the decision, for the dev log.
+   */
+  public applyAutoZoom(geometriesChanged: boolean): string {
+    const mode = this.settings.mapSettingsCard.autoZoomMode;
+    if (mode === AutoZoomMode.Never) { return "no - set to never"; }
+    // only a change in the data may move the map; panning away from the data is the user's choice to keep
+    if (!geometriesChanged) { return "no - geometries unchanged"; }
+    const dataBounds = this.getRenderedDataBounds();
+    if (!dataBounds) { return "no - nothing rendered to zoom to"; }
+
+    if (this.extentIsRestored) {
+      // the first update after a reload looks like brand new data, but the saved extent is a view the
+      // user already chose, so it wins outright whatever the mode
+      this.extentIsRestored = false;
+      return "no - kept the extent restored from the previous session";
+    }
+    if (mode === AutoZoomMode.Always) {
+      this.fitToData(dataBounds);
+      return "yes - set to always follow data";
+    }
+    if (!this.hasFramedData) {
+      this.fitToData(dataBounds);
+      return "yes - first framing of the data";
+    }
+    if (!this.map.getBounds().intersects(dataBounds)) {
+      this.fitToData(dataBounds);
+      return "yes - data are entirely outside the current view";
+    }
+    // a large gain in zoom means the data now sit in a small part of the view, which reads as the user
+    // having narrowed the selection geographically rather than by attribute
+    const zoomGain = this.map.getBoundsZoom(dataBounds) - this.map.getZoom();
+    if (zoomGain >= this.NARROWED_ZOOM_LEVELS) {
+      this.fitToData(dataBounds);
+      return `yes - data now occupy a small part of the view (${zoomGain.toFixed(1)} zoom levels)`;
+    }
+    return `no - data remain in view (${zoomGain.toFixed(1)} zoom levels)`;
+  }
+
+  /**
+   * Moves the map to frame the data.
+   * @private
+   */
+  private fitToData(dataBounds: L.LatLngBounds) {
+    this.zoomMapToBounds(dataBounds);
+    this.hasFramedData = true;
   }
 
   /**
@@ -592,6 +737,7 @@ export class OSPowerBIMapManager {
         this.leafletPointsLayer.remove();
         this.leafletPointsLayer = null;
       }
+      this.pointsCollection = null;
     } else if (which == Layers.Features) {
       if (this.leafletFeaturesLayer) {
         this.leafletFeaturesLayer.eachLayer(
@@ -612,6 +758,7 @@ export class OSPowerBIMapManager {
           this.refLayerManager.UpdateReferenceWhere(this.currentFeatureIdentifiers);
         }
       }
+      this.featuresCollection = null;
     }
   }
 
@@ -634,19 +781,19 @@ export class OSPowerBIMapManager {
    * @param whichLayer Enum value representing which leaflet geojson layer to render to.
    * @param featureLayerHasFeatures Whether the feature layer has features (this affects whether points 
    * will be rendered on a canvas or not).
-   * @param zoomOnAdd Whether to zoom to the data after rendering.
    */
   public renderData(
     data: OSMapsCartographicFeatureCollection,
     whichLayer: Layers,
-    featureLayerHasFeatures: boolean,
-    zoomOnAdd: boolean
+    featureLayerHasFeatures: boolean
   ) {
     // Puts geojsons on the map, removing existing ones first.
     const startTime = performance.now();
     let isSlowWarningShown = false;
     this.clearDataFromMap(whichLayer);
     this.initialiseCanvas();
+    if (whichLayer == Layers.Points) { this.pointsCollection = data; }
+    else { this.featuresCollection = data; }
     const onEachFeature = function (feature: OSMapsGeoJson, layer) {
       layer.setStyle({
         fillColor: feature.fillColour,
@@ -837,13 +984,6 @@ export class OSPowerBIMapManager {
           }
         }
       });
-
-    if (zoomOnAdd) {
-      // If we have points and features this will now zoom the map to whichever has just been added,
-      // not the total extent of both
-      this.map &&
-        this.map.fitBounds(data.knownBounds || leafletLayer.getBounds());
-    }
 
     if (data.hasDuplicateGeometries) {
       this.UIManager.addWarning(

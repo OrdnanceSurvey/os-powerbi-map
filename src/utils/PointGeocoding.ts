@@ -266,6 +266,10 @@ export class PointGeocoder {
       }
       // persist the cache
       if (cacheNeedsSaving) {
+        // this fires part-way through an update, so the resulting update will abort the one we are in
+        this.UIManager.addDevMessage(
+          `Point geocode cache changed - persisting mid-update (${Object.keys(this.cache).length} entries)`
+        );
         this.UIManager.visual.persistDataToCard("geocodeResults", this.cache);
       }
       const toc = performance.now();

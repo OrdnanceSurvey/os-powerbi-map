@@ -2,6 +2,16 @@ import { formattingSettings} from "powerbi-visuals-utils-formattingmodel";
 import FormattingSettingsSlice = formattingSettings.Slice;
 import { colours } from "../resources";
 
+/** How the map extent responds to the data changing. */
+export enum AutoZoomMode {
+  /** The extent never moves on its own. */
+  Never = "never",
+  /** The extent only moves if it would otherwise show none of the data. */
+  OffScreenOnly = "offscreen",
+  /** The extent is refitted to the data whenever the data changes. */
+  Always = "always"
+}
+
 /**
  * Card for map-level settings, including API key, projection, zoom, and legend options.
  * Contains logic to determine zoom level ranges and spatial reference based on settings.
@@ -55,13 +65,29 @@ export class MapSettingsCard extends formattingSettings.SimpleCard {
     description:
      "If selected then a legend will be shown on the map"
   });
+  autoZoomModeOptions: powerbi.IEnumMember[] = [
+    // values must match the AutoZoomMode enum exactly
+    { value: AutoZoomMode.OffScreenOnly, displayName: "Only when data is off-screen" },
+    { value: AutoZoomMode.Always, displayName: "Whenever the data changes" },
+    { value: AutoZoomMode.Never, displayName: "Never" }
+  ];
+  autoZoomMode_UI = new formattingSettings.ItemDropdown({
+    name: "autoZoomMode",
+    displayName: "Zoom map to fit data",
+    items: this.autoZoomModeOptions,
+    value: this.autoZoomModeOptions[0],
+    description:
+      "Controls when the map repositions itself. With the first option, once you have panned or zoomed the map, that view is \
+        kept: the map will only move on its own if the data would otherwise be \
+        off-screen entirely or too small to see clearly. Use the 'Zoom to data' button on the map to fit the \
+        view to your data at any time. \
+        With the second option, the map will always reposition itself to fit the data as you change content."
+  });
+  /** Superseded by autoZoomMode_UI; read once on load to carry over the setting from older reports. */
   autoZoom_UI = new formattingSettings.ToggleSwitch({
     name:"autoZoom",
     displayName: "Auto-zoom to data",
-    value:true,
-    description:
-      "If selected then the map will zoom/pan to fit visible data each time it changes (except when \
-        this is due to filtering being enabled/disabled)"
+    value:true
   });
   showDebug_UI = new formattingSettings.ToggleSwitch({
     name: "showDebugMessages",
@@ -110,7 +136,7 @@ export class MapSettingsCard extends formattingSettings.SimpleCard {
     this.usePremiumData, 
     this.useOSGB_UI, 
     //this.zoomPanSelect_UI, // uncomment to reenable zoom/pan select
-    this.autoZoom_UI,
+    this.autoZoomMode_UI,
     this.showLegend_UI,
     this.showDebug_UI,
     this.useMoreDetailedGeom_UI,
@@ -195,8 +221,14 @@ export class MapSettingsCard extends formattingSettings.SimpleCard {
   get usePremium() { return this.usePremiumData.value}
   /** Gets the zoom/pan select status. */
   get zoomPanSelectStatus(){ return this.zoomPanSelect_UI.value}
-  /** Gets whether auto-zoom is enabled. */
-  get autoZoom(){ return this.autoZoom_UI.value}
+  /** Gets when the map may reposition itself, falling back to the legacy autoZoom toggle for older reports. */
+  get autoZoomMode(): AutoZoomMode {
+    const selected = this.autoZoomMode_UI.value?.value as AutoZoomMode;
+    if (selected === AutoZoomMode.Never || selected === AutoZoomMode.OffScreenOnly || selected === AutoZoomMode.Always) {
+      return selected;
+    }
+    return this.autoZoom_UI.value ? AutoZoomMode.OffScreenOnly : AutoZoomMode.Never;
+  }
   /** Gets whether debug messages are shown. */
   get showDebug(){ return this.showDebug_UI.value}
   /** Gets whether the legend is shown. */

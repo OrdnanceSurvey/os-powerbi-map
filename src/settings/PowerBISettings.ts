@@ -126,13 +126,11 @@ export class ParsedCardSettingsWrapper extends FormattingSettingsModel {
     if (!oldSettings) {
       const c = new SettingsChangeTypes();
       c.SetChangeEverything();
-      c.SetAutozoom(this.mapSettingsCard.autoZoom);
       return c;
     }
     const changeSummary = new SettingsChangeTypes();
     // todo there is scope to simplify this because I think only one thing can change at a time so 
     // we can just return as soon as we find a change, but for now this is clearer and more explicit
-    changeSummary.SetAutozoom(this.mapSettingsCard.autoZoom);
     changeSummary.APIKey = this.mapSettingsCard.apiKey != oldSettings.mapSettingsCard.apiKey;
     changeSummary.MapProjection = this.mapSettingsCard.useOSGB != oldSettings.mapSettingsCard.useOSGB;
     changeSummary.UsingPremium = this.mapSettingsCard.usePremium != oldSettings.mapSettingsCard.usePremium;
@@ -147,7 +145,6 @@ export class ParsedCardSettingsWrapper extends FormattingSettingsModel {
       && this.unmatchedDataStylingCard.isEqual(oldSettings.unmatchedDataStylingCard));
 
     changeSummary.ZoomPanSelectStatus = this.mapSettingsCard.zoomPanSelectStatus != oldSettings.mapSettingsCard.zoomPanSelectStatus;
-    changeSummary.FilterState = this.dataviewIsFiltered != oldSettings.dataviewIsFiltered
     changeSummary.ReferenceFeatures = (this.refLayerConfigCard.OverlayCodes != oldSettings.refLayerConfigCard.OverlayCodes) ||
       (this.refLayerConfigCard.OverlayCodes.length && (this.mapSettingsCard.useDetailedGeom != oldSettings.mapSettingsCard.useDetailedGeom))
     changeSummary.ReferenceCartoSettings = !changeSummary.ReferenceFeatures && !isEqual(this.refLayerStylingCard, oldSettings.refLayerStylingCard)

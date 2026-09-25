@@ -79,6 +79,8 @@ export class OSPowerBIVisual implements IVisual {
   private abortController: AbortController = new AbortController();
   /** Flag to skip the next update cycle. */
   skipNextUpdate: boolean;
+  /** Diagnostic only: id of the update currently awaiting geocoding, so we can see which update aborts which. */
+  private inFlightDataUpdateId: string = null;
   private uploadJustToggledOn: boolean = false;
   private controlsVisibility: ControlDisplayStatus = {
     pointSizingPresent: false,
@@ -91,8 +93,6 @@ export class OSPowerBIVisual implements IVisual {
   private currentStatus: VisualStatus = {
     anyDataShowing: false,
     keyStatus: "not_determined",
-    previousDataExpected: false,
-    previousExtentValid: false,
     apiKey: "",
     currentUpdateId: null
   }
@@ -342,7 +342,14 @@ export class OSPowerBIVisual implements IVisual {
     const isFirstUpdate = !this.formattingSettings;
     let whatChanged: SettingsChangeTypes = newSettingsWrapper.whatChanged(this.formattingSettings||null);
     this.uploadJustToggledOn = whatChanged.UploadToggle && !this.uploadJustToggledOn;
+    // From this assignment onwards the update has consumed any filter-state transition, whether or not it renders
     this.formattingSettings = newSettingsWrapper;
+    this.UIManager.addDevMessage(
+      `Update ${updateId} - state: type=${options.type}, isFirstUpdate=${isFirstUpdate}, hasData=${updateHasData}, ` +
+      `isFiltered=${newSettingsWrapper.dataviewIsFiltered}, ChangeAll=${whatChanged.ChangeAll}, ` +
+      `AnySetting=${whatChanged.AnySetting}, autoZoomMode=${newSettingsWrapper.mapSettingsCard.autoZoomMode}, ` +
+      `hasFramedData=${this.UIManager.mapManager.hasFramedData}`
+    );
 
     this.UIManager.mapManager.updateSettings(newSettingsWrapper);
     this.formattingSettings.updateControlsDisplay(this.controlsVisibility);
@@ -358,10 +365,8 @@ export class OSPowerBIVisual implements IVisual {
       this.controlsVisibility.uploadFilename = this.formattingSettings.uploadedDataConfigCard.FileName;
       this.currentStatus.keyStatus = this.formattingSettings.apiKeyStatus;
       this.currentStatus.apiKey = this.formattingSettings.apiKey;
-      this.currentStatus.previousDataExpected = this.getPersistedSettings("expectingData");
-      this.currentStatus.previousExtentValid = hadSavedExtent && this.currentStatus.previousDataExpected;
-      this.UIManager.addDevMessage(`Update ${updateId} - hadSavedExtent: ${hadSavedExtent}, previousDataExpected: ${this.currentStatus.previousDataExpected}, 
-        previousExtentValid: ${this.currentStatus.previousExtentValid}`);
+      // an extent is only ever saved when a person moves the map, so having one means it was chosen deliberately
+      this.UIManager.addDevMessage(`Update ${updateId} - hadSavedExtent: ${hadSavedExtent}`);
     }
 
     if ((!isFirstUpdate) && whatChanged.UploadToggle && this.uploadJustToggledOn) {
@@ -380,6 +385,7 @@ export class OSPowerBIVisual implements IVisual {
         selector: null
       }
       this.host.persistProperties({merge:[persistObj]});
+      this.logUpdateExit(updateId, "upload toggle", whatChanged);
       this.currentStatus.currentUpdateId = null;
       return;
     }
@@ -395,7 +401,7 @@ export class OSPowerBIVisual implements IVisual {
 
     const mapCanRender = this.UIManager.updateMapCanRender();
     if(!mapCanRender) {
-      this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - map can't render`)
+      this.logUpdateExit(updateId, "map can't render", whatChanged);
       this.events.renderingFinished(options);
       this.currentStatus.currentUpdateId = null;
       return;
@@ -415,8 +421,9 @@ export class OSPowerBIVisual implements IVisual {
       // we need to build the map for the  first time, or rebuild the map to change the projection
       // if boundsForNewMap is not null then it implies we have an extent cached 
       // or there is already a map built (CRS change),  this takes priority
-      this.UIManager.addDevMessage(`Update ${updateId} - Building new map, preventZoomToData is ${this.currentStatus.previousExtentValid}`);
-      this.UIManager.mapManager.buildMap(boundsForNewMap); // with the new setting of useosgb
+      const restoringSavedExtent = isFirstMapBuild && hadSavedExtent;
+      this.UIManager.addDevMessage(`Update ${updateId} - Building new map, restoringSavedExtent is ${restoringSavedExtent}`);
+      this.UIManager.mapManager.buildMap(boundsForNewMap, restoringSavedExtent); // with the new setting of useosgb
       this.UIManager.mapManager.buildBaseLayers();
       this.UIManager.mapManager.toggleVisibility(true);
       if (!newSettingsWrapper.zoomPanSelectStatus) {
@@ -457,7 +464,7 @@ export class OSPowerBIVisual implements IVisual {
     this.UIManager.SetViewOrEditMode(options.viewMode);
     this.UIManager.legendManager.setLegendVisibility(newSettingsWrapper.mapSettingsCard.showLegend);
     if (!isFirstUpdate && !(options.type & powerbi.VisualUpdateType.Data)) {
-      this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - not a data update (type ${options.type})`)
+      this.logUpdateExit(updateId, `not a data update (type ${options.type})`, whatChanged);
       this.events.renderingFinished(options); 
       this.currentStatus.currentUpdateId = null;
       return;
@@ -471,8 +478,15 @@ export class OSPowerBIVisual implements IVisual {
     // should not continue with updating the map when they complete. 
     // We then create a new abort controller for the current update and store it on the visual, so that the next update loop
     // can cancel the the results from this one if necessary, etc
+    if (this.inFlightDataUpdateId) {
+      this.UIManager.addDevMessage(
+        `Update ${updateId} - aborting in-flight data update ${this.inFlightDataUpdateId}, ` +
+        `which will therefore not render and has consumed its filter-state transition`
+      );
+    }
     this.abortController.abort();
     this.abortController = new AbortController();
+    this.inFlightDataUpdateId = updateId;
     
     // display a loading spinner if update takes longer than 3s to run
     const startSpinnerTimeoutID = setTimeout(function () {
@@ -504,13 +518,12 @@ export class OSPowerBIVisual implements IVisual {
           this.UIManager.legendManager.updateSizeLegend(null);
           this.UIManager.mapManager.clearDataFromMap(Layers.Features);
           this.currentStatus.anyDataShowing = false;
-          this.persistDataToCard("expectingData", false);
           this.UIManager.legendManager.updateFeaturesLegend(null);
           this.pointsViewModel = null;
           this.featuresViewModel = null;
           clearTimeout(startSpinnerTimeoutID);
           this.UIManager.mapManager.ToggleSpinner(false);
-          this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - no data, map cleared`)
+          this.logUpdateExit(updateId, "no data - map cleared", whatChanged);
           // TODO this errors if no dataview
           this.UIManager.addDevMessage(`${JSON.stringify(options.dataViews[0].table||
             `Table not present in dataview! Update type ${options.type}`, null, 2)}`)
@@ -532,7 +545,7 @@ export class OSPowerBIVisual implements IVisual {
         const pointBuildIsAborted = pointRes.isAborted;
         const pointBuildLogs = pointRes.logRecords;
         if(pointBuildIsAborted){
-          this.UIManager.addDevMessage(`Update ${updateId} - aborted while building points set at ${new Date().toISOString()}`);
+          this.logUpdateExit(updateId, "aborted while building points set", whatChanged);
           this.currentStatus.currentUpdateId = null;
           return;
         }
@@ -578,7 +591,7 @@ export class OSPowerBIVisual implements IVisual {
         const featureBuildIsAborted = featureRes.isAborted;
         const featureBuildLogs = featureRes.logRecords;
         if(featureBuildIsAborted){
-          this.UIManager.addDevMessage(`Update ${updateId} aborted while building feature set at ${new Date().toISOString()}`);
+          this.logUpdateExit(updateId, "aborted while building feature set", whatChanged);
           this.currentStatus.currentUpdateId = null;
           return;
         }
@@ -648,10 +661,6 @@ export class OSPowerBIVisual implements IVisual {
       // present and current settings mean there is a potential for points overlapping polygons to have 
       // the same colour
       const hasFeatureLayerFeatures = this.featuresViewModel && this.featuresViewModel.length>0;
-      // don't zoom to data if we had an extent to restore AND had expectingdata true AND this is the first time 
-      // of adding data to the map: we are just restoring the visual state from when the user left it, so we 
-      // should trust that the restored extent is what they want to see rather than zooming to the data and losing that restored view.
-      const preventZoomToData = this.currentStatus.previousExtentValid;
       if (this.pointsViewModel && this.pointsViewModel.length>0) {
         // Use "safe" point symbols iif both layers are present, both layers have categorical data, both layers 
         // have the "use default categorical colours" toggle turned on. 
@@ -678,43 +687,37 @@ export class OSPowerBIVisual implements IVisual {
           if(useSafePointSelectionSymbols != this.pointsViewModel.useSafePointSelectionColouring){
             this.pointsViewModel.useSafePointSelectionColouring = useSafePointSelectionSymbols
           }
-          const zoomDecision = whatChanged.ShouldRezoomMap && !preventZoomToData;
-          this.currentStatus.previousExtentValid = false; // only prevent zoom on first data addition after load
           this.UIManager.addDevMessage(`Update id: ${updateId} - Rendering data on layer: ${Layers[Layers.Points]} with ${this.pointsViewModel.length} features`);
-          this.UIManager.addDevMessage(`Update id: ${updateId} - Zoom decision for points layer: ${zoomDecision}`);
-          // do the leaflet stuff to actually add the points to the map, to whichever layer they need to go on (canvas or svg), 
-          // and zooming or not zooming to them as appropriate
+          // do the leaflet stuff to actually add the points to the map, to whichever layer they need to go on (canvas or svg)
           this.UIManager.mapManager.renderData(
-            this.pointsViewModel, Layers.Points, hasFeatureLayerFeatures, zoomDecision
+            this.pointsViewModel, Layers.Points, hasFeatureLayerFeatures
           );
-          this.currentStatus.previousDataExpected = false; // next time it will be something that's just been added
-
           this.currentStatus.anyDataShowing = true;
           this.lastRenderingUpdate = updateId;
           this.UIManager.legendManager.updatePointsLegend(this.pointsViewModel);
           this.UIManager.legendManager.updateSizeLegend(this.pointsViewModel);
           this.UIManager.DisplayToastNotification(null);
-          this.persistDataToCard("expectingData", true);
         }
       }
 
       if (whatChanged.ShouldRebuildFeatures && hasFeatureLayerFeatures) {
         this.featuresViewModel.suppressDuplicateGeoms = true;
-        const zoomDecision = whatChanged.ShouldRezoomMap && !preventZoomToData;
-        this.currentStatus.previousExtentValid = false; // only prevent zoom on first data addition after load
-        this.UIManager.addDevMessage(`Update id: ${updateId} - Zoom decision for features layer: ${zoomDecision}`);
         this.UIManager.addDevMessage(`Update id: ${updateId} - Rendering data on layer: ${Layers[Layers.Features]} with ${this.featuresViewModel.length} features`);
         this.UIManager.mapManager.renderData(
-          this.featuresViewModel, Layers.Features, true, zoomDecision
+          this.featuresViewModel, Layers.Features, true
         );
-        this.currentStatus.previousDataExpected = false; // next time it will be something that's just been added
         this.lastRenderingUpdate = updateId;
         this.currentStatus.anyDataShowing = true;
         this.UIManager.legendManager.updateFeaturesLegend(this.featuresViewModel);
         this.UIManager.legendManager.updateUnmatchedLegend(this.featuresViewModel);
         this.UIManager.DisplayToastNotification(null);
-        this.persistDataToCard("expectingData", true);
       }
+
+      // one extent decision per update, covering whatever is now on both layers
+      const zoomOutcome = this.UIManager.mapManager.applyAutoZoom(whatChanged.GeometriesChanged);
+      this.UIManager.addDevMessage(
+        `Update ${updateId} - auto-zoom: ${zoomOutcome} (geometriesChanged=${whatChanged.GeometriesChanged})`
+      );
 
       this.UIManager.setSelectability(
         // prevent map selection (lasso) if the data view is filtered, or if zoom-pan select 
@@ -735,9 +738,23 @@ export class OSPowerBIVisual implements IVisual {
       this.UIManager.DisplayToastNotification(null);
     }
     this.formattingSettings.updateControlsDisplay(this.controlsVisibility);
+    if (this.inFlightDataUpdateId === updateId) { this.inFlightDataUpdateId = null; }
     this.UIManager.addDevMessage(`Update ${updateId} - done at ${new Date().toISOString()} - complete`);
     this.events.renderingFinished(options);
     this.currentStatus.currentUpdateId = null;
+  }
+
+  /**
+   * Logs an update that is exiting without rendering, and releases its in-flight marker.
+   * Such an update has still consumed any filter-state transition, so the next update won't see it.
+   * @private
+   */
+  private logUpdateExit(updateId: string, reason: string, whatChanged: SettingsChangeTypes) {
+    if (this.inFlightDataUpdateId === updateId) { this.inFlightDataUpdateId = null; }
+    this.UIManager.addDevMessage(
+      `Update ${updateId} - EXIT (${reason}) at ${new Date().toISOString()} - did not render, ` +
+      `geometriesChanged=${whatChanged.GeometriesChanged}`
+    );
   }
  
   /**

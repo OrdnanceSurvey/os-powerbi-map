@@ -516,6 +516,10 @@ export class PolygonGeocoder {
    */
   private saveCache() {
     if (!this.cacheNeedsSaving) { return; }
+    // this fires part-way through an update, so the resulting update will abort the one we are in
+    this.UIManager.addDevMessage(
+      `Polygon geocode cache changed - persisting mid-update (${Object.keys(this.cache).length} entries)`
+    );
     this.UIManager.visual.persistDataToCard("polygonGeocodeResults", this.cache);
     this.UIManager.visual.persistDataToCard("usingDetailedGeom", this._useDetailedGeom);
     this.UIManager.visual.persistDataToCard("polygonGeocodeBounds", this.previousInputBounds);
