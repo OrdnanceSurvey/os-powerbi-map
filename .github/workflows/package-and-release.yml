@@ -3,7 +3,14 @@ name: "Build and Release"
 
 on:
   push:
+    tags:
+      - "v*.*.*.*"
     branches: [ main ]
+
+permissions:
+  contents: write
+  discussions: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,17 +39,24 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
 
-    - name: Fail if version tag already exists
+    - name: Fail if tag does not match pbiviz version
+      if: github.ref_type == 'tag'
       run: |
-        git fetch --tags
-        if git tag | grep -qx "v${{ steps.pbiviz_version.outputs.version }}"; then
-        echo "❌ Version already released. Bump visual.version in pbiviz.json."
-        exit 1
+        if [ "${{ github.ref_name }}" != "v${{ steps.pbiviz_version.outputs.version }}" ]; then
+          echo "❌ Tag ${{ github.ref_name }} does not match visual.version ${{ steps.pbiviz_version.outputs.version }} in pbiviz.json."
+          exit 1
         fi
 
     - name: Fail if changelog not updated
+      if: github.ref_type == 'tag'
       run: |
-        if ! git diff --name-only $(git describe --tags --abbrev=0) | grep -q CHANGELOG.md; then
+        # compare against the tag before the one being released
+        PREV_TAG=$(git describe --tags --abbrev=0 "${{ github.ref_name }}^" 2>/dev/null || true)
+        if [ -z "$PREV_TAG" ]; then
+          echo "ℹ️ No previous tag found; skipping CHANGELOG check."
+          exit 0
+        fi
+        if ! git diff --name-only "$PREV_TAG" "${{ github.ref_name }}" | grep -q CHANGELOG.md; then
           echo "❌ CHANGELOG.md must be updated for every release."
           exit 1
         fi
@@ -57,14 +71,23 @@ jobs:
         VERSION=${{ steps.pbiviz_version.outputs.version }}
         mv dist/*.pbiviz "dist/OS-Power-BI-Map-v$VERSION.pbiviz"
 
+    - name: Upload build artifact
+      if: github.ref_type != 'tag'
+      uses: actions/upload-artifact@v4
+      with:
+        name: OS-Power-BI-Map-v${{ steps.pbiviz_version.outputs.version }}
+        path: dist/*.pbiviz
 
+  # only release if it's a tag
     - name: Release
       uses: softprops/action-gh-release@v3
+      if: github.ref_type == 'tag'
       with:
-        tag_name: v${{ steps.pbiviz_version.outputs.version }}
-        name: OS Power BI Map v${{ steps.pbiviz_version.outputs.version }}
+        tag_name: ${{ github.ref_name }}
+        name: OS Power BI Map ${{ github.ref_name }}
         files: |
             dist/*.pbiviz
+        discussion_category_name: Announcements
 
 
     - run: echo "🍏 This job's status is ${{ job.status }}."
