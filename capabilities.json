@@ -259,6 +259,11 @@
                         "bool": true
                     }
                 },
+                "autoZoomMode":{
+                    "type": {
+                        "enumeration": []
+                    }
+                },
                 "showDebugMessages":{
                     "type": {
                         "bool": true
@@ -477,9 +482,6 @@
                 },
                 "lastKeyStatus":{
                     "type": {"text": true}
-                },
-                "expectingData":{
-                    "type": {"bool": true}
                 }
             }
         }

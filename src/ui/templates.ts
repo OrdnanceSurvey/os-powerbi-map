@@ -345,7 +345,21 @@ const Templates = {
     <p>If you are uploading your own geospatial data into the visual, you can choose to display any features which have not been matched to your Power BI data. These unmatched features can be styled separately by choosing "Unmatched uploaded features" 
     in the dropdown at the top of the Symbology Settings pane. You can control border style, border thickness, fill colour and fill opacity, as well as point sizing in the case of point geometries.</p>
     <div class="tabset__images">${pointsImage}${polygonsImage}${bristolLinesImage}</div>
-      </section>
+    
+    <h2>Map Behaviour</h2>
+    <p>Controls under the "Map Settings" pane allow you to adjust various aspects of the map's behaviour.
+    <ul class="tabset__bullets">
+      <li><strong>Use Premium Data:</strong> If the API key allows access to premium data sources, this option enables their use on the map. You can disable this if your API key gives access to premium data but you do not wish to use it within this visual.</li>
+      <li><strong>Use BNG for map:</strong> If enabled, the map will use the British National Grid coordinate system for displaying data. This is required in order to enable the OS Leisure base layer, but makes little difference for most other use cases because data will be reprojected on the fly.</li>
+      <li><strong>Zoom map to fit data:</strong> This controls how the map "follows" the data as you add it and as the report viewer changes the data by applying slicers or filters. You can have the map constantly re-zoom to fit the data, or do this only 
+      if filters mean no data are currently visible.</li>
+      <li><strong>Display legend on map:</strong> If enabled, a legend will be displayed on the map to help interpret the symbology used for different layers.</li>
+      <li><strong>Show debug messages:</strong> Leave this disabled unless you are troubleshooting issues with the visual.</li>
+      <li><strong>Use high-resolution GSS polygons:</strong> For many services, ONS publish a high and low resolution of the polygons. If enabled, the visual will use high-resolution GSS polygons for better accuracy and detail in the map display, but this may come at the cost of increased loading times and higher memory usage.</li>
+      <li><strong>Show identifier in popups:</strong> If enabled, features created from an identifier (geocodes) will always show that identifier at the top of the popup. Otherwise, you can always add it to the popup field well as needed.</li>
+    </ul>
+    </p>
+    </section>
 
       
   <section id="faqs" class="tabset__panel">

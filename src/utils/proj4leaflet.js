@@ -143,6 +143,23 @@
 		},
 
 		zoom: function(scale) {
+			// Below the first entry of _scales the ladder is synthetic (see getScale): each
+			// negative zoom level halves the base scale. Invert that here rather than falling
+			// through to _closestElement, which would find nothing and return -Infinity.
+			if (scale < this._scales[0]) {
+				if (!(scale > 0)) {
+					return -Infinity;
+				}
+				var downNegZoom = Math.floor(Math.log(scale / this._scales[0]) / Math.LN2),
+					downNegScale = this.getScale(downNegZoom),
+					nextNegScale = this.getScale(downNegZoom + 1);
+				if (scale === downNegScale) {
+					return downNegZoom;
+				}
+				// interpolate linearly, matching scale()'s behaviour for non-integer zooms
+				return (scale - downNegScale) / (nextNegScale - downNegScale) + downNegZoom;
+			}
+
 			// Find closest number in this._scales, down
 			var downScale = this._closestElement(this._scales, scale),
 				downZoom = this._scales.indexOf(downScale),

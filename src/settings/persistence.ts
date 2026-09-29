@@ -62,21 +62,6 @@ export class PersistedSettingsHolderCard extends formattingSettings.SimpleCard {
     value: "not_determined",
     placeholder: ""
   });
-  // in Desktop, when reloading a previously configured visual, the data seem to only be 
-  // present on the second or later update (this may be a bug) - so we use this flag 
-  // to indicate that we are expecting data to be present soon. If this is true, we'll know 
-  // that when we first do get an update with data, it's not new data, just the initial load, 
-  // and so we shouldn't zoom to it and overwrite any saved extent. 
-  // If we don't do this then on desktop it'll zoom to the data every time we tab back to the 
-  // visual's page in the report. 
-  // This doesn't happen on the web version as the data is present on first load, which is a 
-  // very annoying inconsistency that is surely a bug, making it hard to get this first-load behavior 
-  // right without hacky solutions like this flag.
-  expectingData = new formattingSettings.ToggleSwitch({
-    name: "expectingData",
-    displayName: "expectingData",
-    value: false,
-  });
   name: string = "osmapsPersistedSettings";
   /** Card display name. */
   displayName: string = "osmapsPersistedSettings";
@@ -84,6 +69,6 @@ export class PersistedSettingsHolderCard extends formattingSettings.SimpleCard {
   slices: Array<FormattingSettingsSlice> = [
     this.geocodeResults, this.polygonGeocodeResults, this.polygonGeocodeBounds,
     this.layername, this.mapExtent, this.usingDetailedGeom, this.uploadedGeojson, 
-    this.uploadedGeojson_idfield, this.lastKeyStatus, this.expectingData];
+    this.uploadedGeojson_idfield, this.lastKeyStatus];
   visible: boolean = false;
 }
