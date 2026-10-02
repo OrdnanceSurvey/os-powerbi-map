@@ -1,9 +1,17 @@
 import * as esri from "esri-leaflet";
-import { FeatureCollection } from "geojson";
+import { Feature } from "geojson";
 import { LatLngBounds } from "leaflet";
 import { GSSServiceDetails } from "../types/geocoding-types";
-import {EsriQueryCheckResult, GeocodeParams} from "../types/geocoding-types"
+import {EsriQueryCheckResult, EsriQueryRunResult, GeocodeParams} from "../types/geocoding-types"
 import { fetchGSSServices } from "./getGSSInfo";
+import {
+  batchCodes,
+  boundsEsriQuery,
+  countEsriQuery,
+  isAbortError,
+  runEsriQueryPaged,
+  runWithConcurrencyLimit
+} from "./Geocode_Utils";
 import { createHash } from "./utils";
 
 /**
@@ -93,6 +101,18 @@ export class GeoportalServiceManager{
     }
 
     /**
+     * Builds one Esri query per batch of codes. The services error rather than paging when a where
+     * clause contains too many codes, so we send several smaller queries instead of one big one.
+     * @param params Geocode parameters for the query.
+     * @returns An array of Esri query objects, together covering all the codes in the parameters.
+     */
+    public buildGeometryQueries(params: GeocodeParams): esri.Query[] {
+      return batchCodes(params.codes).map((codes) =>
+        this.buildGeometryQuery({ ...params, codes: codes })
+      );
+    }
+
+    /**
      * Builds an Esri query for retrieving table data.
      * @throws Always throws "Method not implemented."
      */
@@ -102,9 +122,11 @@ export class GeoportalServiceManager{
     }
 
     /**
-     * Gets the count and bounds of features for a given query and service prefix.
+     * Gets the combined count and bounds of the features matched by a set of batched queries.
+     * If any batch fails then the whole result is reported as an error, as a partial count or
+     * extent would be misleading.
      * @param prefix The GSS code prefix.
-     * @param query The Esri query object.
+     * @param queries The batched Esri query objects, as built by buildGeometryQueries.
      * @param signal Abort signal for cancellation.
      * @param getCount Whether to retrieve the feature count.
      * @param getBounds Whether to retrieve the feature bounds.
@@ -112,45 +134,48 @@ export class GeoportalServiceManager{
      */
     public async getQueryCountAndBounds(
       prefix: string,
-      query: esri.Query,
+      queries: esri.Query[],
       signal: AbortSignal,
       getCount: boolean,
       getBounds: boolean
     ): Promise<EsriQueryCheckResult> {
       let bnds: LatLngBounds = null;
-      let count: number = -1;
-      let msg: any;
-      if(getCount){
-        try {
-          count = await new Promise<number>((resolve, reject) => query.count((error, n) => error ? reject(error) : resolve(n)));
-        } catch (error) {
-          msg = error instanceof Error ? error.message : String(error);
-          return {
-            prefix: prefix,
-            n_features: count,
-            bounds: bnds,
-            message: msg,
-          };
-        }
-        if (!count) {
-          return { prefix:prefix, n_features: 0, bounds: bnds, message: "No features found" };
-        }
-      }
-      if(getBounds){
-        try {
+      let count: number = getCount ? 0 : -1;
+      try {
+        const batchResults = await runWithConcurrencyLimit(
+          queries.map((query) => async () => {
+            const batchCount = getCount ? await countEsriQuery(query) : -1;
+            // no point asking a batch which matched nothing for its extent
+            const batchBounds = getBounds && batchCount !== 0 ? await boundsEsriQuery(query) : null;
+            return { batchCount: batchCount, batchBounds: batchBounds };
+          }),
+          signal
+        );
+        batchResults.forEach((batchResult) => {
+          if (getCount) { count += batchResult.batchCount; }
           // get the bounds of the features we'll be returning, to give us an impression of how big a geographic
           // extent it is. We'll assume that if it's a bigger extent, we're less likely to go pixel-peeping
           // and can get away with a more generalised geometry to keep volumes down
-          bnds = await new Promise<LatLngBounds>((resolve, reject) => query.bounds((error, b) => error ? reject(error) : resolve(b)));
-        } catch (error) {
-          msg = "Shouldn't get here, oops!"
-        }
+          if (batchResult.batchBounds && batchResult.batchBounds.isValid()) {
+            bnds = bnds ? bnds.extend(batchResult.batchBounds) : batchResult.batchBounds;
+          }
+        });
+      } catch (error) {
+        if (isAbortError(error)) { throw error; }
+        return {
+          prefix: prefix,
+          n_features: -1,
+          bounds: null,
+          message: error instanceof Error ? error.message : String(error),
+        };
+      }
+      if (getCount && count === 0) {
+        return { prefix: prefix, n_features: 0, bounds: bnds, message: "No features found" };
       }
       return {
-        prefix:prefix,
+        prefix: prefix,
         n_features: count,
-        bounds: bnds,
-        message:msg
+        bounds: bnds
       }
     }
 
@@ -185,45 +210,46 @@ export class GeoportalServiceManager{
     }
 
     /**
-     * Runs the given Esri query, handling paging if the number of features exceeds the per-query limit.
-     * @param query The Esri query object.
-     * @param signal Abort signal for cancellation.
-     * @param expectedCount The expected number of features (optional).
-     * @returns A promise resolving to a GeoJSON FeatureCollection of all results.
+     * Applies simplification to each of a set of batched queries.
+     * @param queries The batched Esri query objects.
+     * @param bnds Optional bounds to estimate offset.
+     * @param maxAllowableOffsetDegrees Optional explicit offset in degrees.
+     * @returns The modified Esri queries.
      */
-    public async runQuery(
-      query: esri.Query,
-      signal: AbortSignal,
-      expectedCount: number
-    ): Promise<FeatureCollection> {
-      let pageCount;
-      if(!(expectedCount || expectedCount ===0 )){
-        expectedCount = (await this.getQueryCountAndBounds(null, query, signal, true, false)).n_features;
-      }
-      pageCount = Math.ceil(expectedCount / this.max_feature_count);
-      let pageOffsets = [];
-      for (let i=0; i<pageCount; i++){
-        pageOffsets.push(i * this.max_feature_count);
-      }
-      query.limit(this.max_feature_count);
-      let allProm = Promise.all(pageOffsets.map(function(resultPageStart){
-        query.offset(resultPageStart);
-        // using the required callback syntax approach will make the calling code in the visual
-        // more complex. So I have wrapped the esri query run into a promise so we can use
-        // async/await syntax
-        return new Promise<FeatureCollection>((resolve, reject) => query.run((error, fc) => error ? reject(error) : resolve(fc)))
-      }));
-      let combinedFeatureCollection: FeatureCollection;
-      try {
-        let paginatedResults = await allProm;
-        combinedFeatureCollection = paginatedResults.pop();
-        paginatedResults.forEach(function(resultFeatureSet){
-          Array.prototype.push.apply(combinedFeatureCollection.features, resultFeatureSet.features)
-        });
-      } catch (error) {
-        //console.log(error); // TODO handle properly
-        return null; //{n_features: 0, bounds:null};
-      }
-      return combinedFeatureCollection;
+    public simplifyQueries(queries: esri.Query[], bnds?: LatLngBounds, maxAllowableOffsetDegrees?: number): esri.Query[] {
+      return queries.map((query) => this.simplifyQuery(query, bnds, maxAllowableOffsetDegrees));
+    }
+
+    /**
+     * Runs a set of batched queries, paging through the results of each, and combines the features.
+     * A batch which fails does not discard the features returned by the others; its error message is
+     * returned instead, so the caller can tell the user and avoid caching a missing result as a
+     * genuine "not found".
+     * @param queries The batched Esri query objects, as built by buildGeometryQueries.
+     * @param signal Abort signal for cancellation.
+     * @returns A promise resolving to the combined features and any error messages.
+     */
+    public async runQueries(
+      queries: esri.Query[],
+      signal: AbortSignal
+    ): Promise<EsriQueryRunResult> {
+      const errors: string[] = [];
+      const features: Feature[] = [];
+      const batchResults = await runWithConcurrencyLimit(
+        queries.map((query) => async () => {
+          try {
+            return await runEsriQueryPaged(query, this.max_feature_count, signal);
+          } catch (error) {
+            if (isAbortError(error)) { throw error; }
+            errors.push(error instanceof Error ? error.message : String(error));
+            return [] as Feature[];
+          }
+        }),
+        signal
+      );
+      batchResults.forEach((batchFeatures) => {
+        Array.prototype.push.apply(features, batchFeatures);
+      });
+      return { features: features, errors: errors };
     }
 }

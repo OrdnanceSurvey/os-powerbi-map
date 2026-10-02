@@ -1,9 +1,29 @@
-import { Feature } from "geojson";
+import * as esri from "esri-leaflet";
+import { Feature, FeatureCollection } from "geojson";
+import { LatLngBounds } from "leaflet";
 import { StringToStringsDict } from "../types/data-types";
 import { PointDictionary, GeojsonFeatureDictionary } from "../types/geocoding-types";
 import { gss_regex } from "../resources";
 
 export const GSS_CHECKER = new RegExp(gss_regex);
+
+/**
+ * Maximum number of codes to place in the "IN (...)" clause of a single query. Measured against the
+ * ONS/BoundaryLine ward service and the OS UPRN service (Oct 2026): both accept exactly 4000 codes
+ * and reject 4001 with "SQL query is nested too deeply", regardless of how long the clause is. 1000
+ * leaves plenty of headroom and, at the concurrency below, was the quickest of the sizes tested.
+ */
+export const MAX_CODES_PER_QUERY = 1000;
+
+/**
+ * Maximum number of characters to allow in the "IN (...)" clause of a single query. The services
+ * happily accept far longer clauses than this (48,000 characters tested fine), so this is only a
+ * guard against unexpectedly long identifiers, and normally doesn't bind before the code count does.
+ */
+export const MAX_WHERE_CLAUSE_CHARS = 20000;
+
+/** Number of batched queries to have in flight against a service at any one time. */
+export const MAX_CONCURRENT_QUERIES = 4;
 
 /**
  * Checks if the input array is an array of strings.
@@ -144,3 +164,181 @@ export function getUniqueColumns(loadedData:Feature[]): string[]{
         });
         return uniqueProps;
     }
+
+/**
+ * Splits a list of codes into batches that are small enough to be safely used in the "IN (...)"
+ * clause of a single query. ArcGIS Online services return an error rather than a paged result when
+ * the where clause gets too long, so we have to batch the codes client-side rather than relying on
+ * server-side pagination. Duplicate codes are removed.
+ * @param codes The codes to be split into batches.
+ * @param maxCodesPerBatch Maximum number of codes in a batch.
+ * @param maxCharsPerBatch Maximum estimated length, in characters, of the clause for a batch.
+ * @returns An array of code batches.
+ */
+export function batchCodes<T extends string | number>(
+    codes: T[],
+    maxCodesPerBatch: number = MAX_CODES_PER_QUERY,
+    maxCharsPerBatch: number = MAX_WHERE_CLAUSE_CHARS
+): T[][] {
+    const batches: T[][] = [];
+    let current: T[] = [];
+    let currentChars = 0;
+    Array.from(new Set(codes)).forEach((code) => {
+        const codeChars = String(code).length + 3; // allow for the quotes and separating comma
+        const full = current.length >= maxCodesPerBatch || currentChars + codeChars > maxCharsPerBatch;
+        if (current.length && full) {
+            batches.push(current);
+            current = [];
+            currentChars = 0;
+        }
+        current.push(code);
+        currentChars += codeChars;
+    });
+    if (current.length) { batches.push(current); }
+    return batches;
+}
+
+/**
+ * Creates an Error with the name used by the fetch/AbortController convention, so that callers can
+ * tell a cancelled operation apart from a genuine failure.
+ * @param message Optional message for the error.
+ * @returns An Error named "AbortError".
+ */
+export function abortError(message: string = "Operation aborted"): Error {
+    const err = new Error(message);
+    err.name = "AbortError";
+    return err;
+}
+
+/**
+ * Checks whether an unknown thrown value represents a cancelled operation.
+ * @param error The caught value.
+ * @returns True if the value represents an abort.
+ */
+export function isAbortError(error: unknown): boolean {
+    return !!error && (error as { name?: string }).name === "AbortError";
+}
+
+/**
+ * Converts the error argument given by an esri-leaflet callback (a plain object with code and
+ * message properties) into a standard Error with a readable message.
+ * @param error The error reported by esri-leaflet.
+ * @param context Description of what was being attempted, included in the message.
+ * @returns An Error describing the failure.
+ */
+function asQueryError(error: any, context: string): Error {
+    if (error instanceof Error) { return error; }
+    const code = error && error.code ? ` (code ${error.code})` : "";
+    const message = (error && error.message) || "unknown error";
+    return new Error(`Error ${context}: ${message}${code}`);
+}
+
+/**
+ * Promisified version of esri.Query.count which rejects with a readable Error on failure.
+ * @param query The Esri query object.
+ * @returns A promise resolving to the number of matching features.
+ */
+export function countEsriQuery(query: esri.Query): Promise<number> {
+    return new Promise<number>((resolve, reject) =>
+        query.count((error: any, count: number) =>
+            error ? reject(asQueryError(error, "counting features")) : resolve(count)
+        )
+    );
+}
+
+/**
+ * Promisified version of esri.Query.bounds which rejects with a readable Error on failure.
+ * @param query The Esri query object.
+ * @returns A promise resolving to the bounds of the matching features.
+ */
+export function boundsEsriQuery(query: esri.Query): Promise<LatLngBounds> {
+    return new Promise<LatLngBounds>((resolve, reject) =>
+        query.bounds((error: any, bounds: LatLngBounds) =>
+            error ? reject(asQueryError(error, "retrieving feature bounds")) : resolve(bounds)
+        )
+    );
+}
+
+/**
+ * Runs a single page of a query, returning the features along with the service's own report of
+ * whether there are more records to come.
+ * @param query The Esri query object.
+ * @returns A promise resolving to the page's features and the service's exceededTransferLimit flag,
+ * which is undefined if the service didn't report one.
+ */
+function runEsriQueryPage(query: esri.Query): Promise<{ features: Feature[], moreAvailable: boolean }> {
+    return new Promise((resolve, reject) =>
+        query.run((error: any, featureCollection: FeatureCollection, response: any) => {
+            if (error) {
+                reject(asQueryError(error, "retrieving features"));
+                return;
+            }
+            // esri-leaflet gives us the raw service response as its third argument; services which
+            // support pagination set exceededTransferLimit on it (older ones put it on properties)
+            const more = response && (response.exceededTransferLimit !== undefined
+                ? response.exceededTransferLimit
+                : response.properties && response.properties.exceededTransferLimit);
+            resolve({
+                features: (featureCollection && featureCollection.features) || [],
+                moreAvailable: more
+            });
+        })
+    );
+}
+
+/**
+ * Runs a single query, requesting successive pages of results until the service tells us there are
+ * no more. Paging this way avoids having to run a separate count query first. If the service does
+ * not report whether more records are available we fall back to assuming that a page shorter than
+ * the one we asked for is the last one - note that this is only reliable if the service's own
+ * maxRecordCount is at least as large as the requested page size.
+ * @param query The Esri query object, which will be mutated to set its limit and offset.
+ * @param pageSize Number of features to request per page.
+ * @param signal Optional abort signal, checked between pages.
+ * @returns A promise resolving to all the features returned by the query.
+ */
+export async function runEsriQueryPaged(
+    query: esri.Query,
+    pageSize: number,
+    signal?: AbortSignal
+): Promise<Feature[]> {
+    const features: Feature[] = [];
+    let offset = 0;
+    query.limit(pageSize);
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        if (signal && signal.aborted) { throw abortError(); }
+        query.offset(offset);
+        const page = await runEsriQueryPage(query);
+        Array.prototype.push.apply(features, page.features);
+        if (!page.features.length) { break; } // nothing more to fetch, and guards against looping forever
+        const moreToCome = page.moreAvailable === undefined
+            ? page.features.length >= pageSize
+            : page.moreAvailable;
+        if (!moreToCome) { break; }
+        offset += page.features.length;
+    }
+    return features;
+}
+
+/**
+ * Runs the given asynchronous tasks a few at a time, so that batching a large request doesn't
+ * result in hundreds of simultaneous calls to a service.
+ * @param taskFactories Functions which each start one task when called.
+ * @param signal Optional abort signal, checked before each group of tasks is started.
+ * @param maxConcurrent Maximum number of tasks to have running at once.
+ * @returns A promise resolving to the task results, in the order the tasks were given.
+ */
+export async function runWithConcurrencyLimit<T>(
+    taskFactories: (() => Promise<T>)[],
+    signal?: AbortSignal,
+    maxConcurrent: number = MAX_CONCURRENT_QUERIES
+): Promise<T[]> {
+    const results: T[] = [];
+    for (let i = 0; i < taskFactories.length; i += maxConcurrent) {
+        if (signal && signal.aborted) { throw abortError(); }
+        const group = taskFactories.slice(i, i + maxConcurrent).map((task) => task());
+        Array.prototype.push.apply(results, await Promise.all(group));
+    }
+    return results;
+}

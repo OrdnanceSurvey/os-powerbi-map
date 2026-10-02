@@ -310,11 +310,11 @@ export class PolygonGeocoder {
           const thisQueryParams = allQueryDetails[prefix];
           const seenThisServiceQueryBefore: boolean = thisQueryParams.codesHash in this.previousSubqueryBounds;
           if (!seenThisServiceQueryBefore) {
-            const boundsQuery = this.geoportalManager.buildGeometryQuery(thisQueryParams);
+            const boundsQueries = this.geoportalManager.buildGeometryQueries(thisQueryParams);
             // do not await here in the loop, instead do promise.all on the requests and await that. This is so each bounds query
             // (one to each feature service) can run in parallel rather than one after another which should be much faster for a 
             // dataset containing lots of different GSS code types
-            const boundsResultProm: Promise<EsriQueryCheckResult> = this.geoportalManager.getQueryCountAndBounds(prefix, boundsQuery, signal, true, true);
+            const boundsResultProm: Promise<EsriQueryCheckResult> = this.geoportalManager.getQueryCountAndBounds(prefix, boundsQueries, signal, true, true);
             boundsQueryPromises.push(boundsResultProm)
           }
         }
@@ -332,7 +332,8 @@ export class PolygonGeocoder {
           } else if (boundsResult.n_features === -1) {
             this.UIManager.addError(
               `An error occurred calling the polygon geocoding service for '${prefix}' GSS codes. ` +
-              "This is an external service outside of our control - please try again later"
+              "This is an external service outside of our control - please try again later" +
+              (boundsResult.message ? ` (${boundsResult.message})` : "")
             );
             erroredQueryPrefixes.push(prefix);
           }
@@ -380,17 +381,16 @@ export class PolygonGeocoder {
             continue; // we've already logged an error for it
           }
           const queryParams = requiredQueryDetails[prefix];
-          const countQueryParams = allQueryDetails[prefix];
-          const expectedCount = countQueryParams.knownCount;
-          queryParams.knownCount = expectedCount;
-          let query = this.geoportalManager.buildGeometryQuery(queryParams);
+          let queries = this.geoportalManager.buildGeometryQueries(queryParams);
           // simplify each dataset query based on the bounds of all the data being requested by user,
           // not just what is uncached and in this particular query
-          query = this.geoportalManager.simplifyQuery(query, totalBounds);
+          queries = this.geoportalManager.simplifyQueries(queries, totalBounds);
           // nb this does mean that we cache the results for each feature at a given simplification level so if we
           // get called with a superset later, then features previously requested will have more detail than the
           // new ones
-          const n_features = await this.callAndCacheEsriQuery(query, queryParams, signal);
+          const fetchResult = await this.callAndCacheEsriQuery(queries, queryParams, signal);
+          const n_features = fetchResult.nFeatures;
+          if (fetchResult.errored) { erroredQueryPrefixes.push(prefix); }
 
           // update allGeocodeMetrics for logs
           if (allGeocodeMetrics[prefix] && typeof n_features === 'number' && !isNaN(n_features)) {
@@ -409,14 +409,10 @@ export class PolygonGeocoder {
             this.UIManager.addDevMessage(`Geocoding in update ${updateid} aborted after retrieving features for ${prefix}`);
             return { geocodes: null, bounds: null, aborted:true };
           }
-          if (n_features === -1) {
-            //console.log("shouldn't get here oops");
-          } else {
-            this.UIManager.addDebugMessage(
-              `${n_features} of ${queryParams.codes.length} ${queryParams.entity} (${prefix}) ` +
-              `identifiers were successfully geocoded.`
-            );
-          }
+          this.UIManager.addDebugMessage(
+            `${n_features} of ${queryParams.codes.length} ${queryParams.entity} (${prefix}) ` +
+            `identifiers were successfully geocoded.`
+          );
         }
         //console.log("Completed all geocoding queries");
       }
@@ -438,6 +434,11 @@ export class PolygonGeocoder {
         }
         else {
           if (parsedIdentifiers.toFetch.includes(cleanIdentifier)) {
+            if (erroredQueryPrefixes.includes(cleanIdentifier.substring(0, 3))) {
+              // the service call failed rather than telling us there's no such feature, so don't
+              // report it as not found and don't cache it as such either - we want to try again
+              return;
+            }
             notfound_clean.push(cleanIdentifier);
             this.cache[cleanIdentifier] = null; // so we don't bother querying api for it next time
             // TODO or some distinct error value which we check for
@@ -489,25 +490,31 @@ export class PolygonGeocoder {
   }
 
   /**
-   * Calls the Esri query and caches the resulting features.
-   * @param query The Esri query object.
+   * Calls the batched Esri queries for one service and caches the resulting features.
+   * @param queries The batched Esri query objects.
    * @param params Geocode parameters for the query.
    * @param signal Abort signal for cancellation.
-   * @returns A promise resolving to the number of features returned.
+   * @returns A promise resolving to the number of features returned and whether any batch failed.
    * @private
    */
   private async callAndCacheEsriQuery(
-    query: esri.Query,
+    queries: esri.Query[],
     params: GeocodeParams,
     signal: AbortSignal
-  ): Promise<number> {
-    const res = await this.geoportalManager.runQuery(query, signal, params.knownCount);
-    if (!res) { return 0; }
+  ): Promise<{ nFeatures: number, errored: boolean }> {
+    const res = await this.geoportalManager.runQueries(queries, signal);
     res.features.forEach((feat) => {
       this.cache[feat.properties[params.codefield]] = feat;
+      this.cacheNeedsSaving = true;
     });
-    this.cacheNeedsSaving = true
-    return res.features.length; //{n_features: res.features.length, bounds:bnds};
+    if (res.errors.length) {
+      this.UIManager.addError(
+        `${res.errors.length} of ${queries.length} requests to the polygon geocoding service for ` +
+        `${params.entity} failed, so some features may be missing from the map. This is an external ` +
+        `service outside of our control - please try again later (${res.errors[0]})`
+      );
+    }
+    return { nFeatures: res.features.length, errored: res.errors.length > 0 };
   }
 
   /**
