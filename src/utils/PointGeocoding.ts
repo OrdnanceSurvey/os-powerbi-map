@@ -1,10 +1,9 @@
 import { postcode_regex} from "../resources";
 import { postcodeUrl_Esri, uprnUrl_Esri } from "../resources";
 import * as esri from "esri-leaflet";
-import { FeatureCollection } from "geojson";
 import { OSPowerBIUIManager } from "../ui/uimanager";
-import { PointDictionary, GeocodeTypes, IdentifierParseResults, GeocodeParams, GeocodeMetrics } from "../types/geocoding-types"
-import { isNumeric, removeNullsAndZero, isStringArr, cleanStringIdentifiers, restoreOriginalIdentifierKeys, restoreOriginalIdentifiers, GSS_CHECKER } from "./Geocode_Utils"
+import { PointDictionary, GeocodeTypes, IdentifierParseResults, GeocodeMetrics } from "../types/geocoding-types"
+import { isNumeric, removeNullsAndZero, isStringArr, cleanStringIdentifiers, restoreOriginalIdentifierKeys, restoreOriginalIdentifiers, GSS_CHECKER, batchCodes, isAbortError, runEsriQueryPaged, runWithConcurrencyLimit } from "./Geocode_Utils"
 
 /**
  * Handles geocoding of point identifiers (postcodes, UPRNs) using Esri services and manages a local cache.
@@ -210,11 +209,18 @@ export class PointGeocoder {
       let apiCallCompleted = false;
       // Fetch data from the API and use it to populate the cache, which is indexed by clean identifier
       if (parsedIdentifiers.toFetch.length > 0) {
-            let esriResponses = await this.batch_geocode_esri(parsedIdentifiers.toFetch, parsedIdentifiers.type);
-            if(esriResponses !== null) {apiCallCompleted = true;} 
-            if (esriResponses && Object.keys(esriResponses).length){
+            const esriResponse = await this.batch_geocode_esri(parsedIdentifiers.toFetch, parsedIdentifiers.type, signal);
+            // only treat values as genuinely unmatched if every batch of the call came back cleanly
+            apiCallCompleted = esriResponse.errors.length === 0;
+            if (esriResponse.errors.length) {
+              this.UIManager.addError(
+                `${esriResponse.errors.length} request(s) to our geocoding API failed, so some ${what} values ` +
+                `may not be mapped. Please try again later (${esriResponse.errors[0]})`
+              );
+            }
+            if (Object.keys(esriResponse.geocodes).length){
               cacheNeedsSaving = true;
-              this.cache = {...this.cache, ...esriResponses}
+              this.cache = {...this.cache, ...esriResponse.geocodes}
         }
       }
       // now build the actual return object by going back over the input and retrieving the values from the cache
@@ -235,11 +241,13 @@ export class PointGeocoder {
         else {
           if (parsedIdentifiers.toFetch.includes(i)) {
             notfound_clean.push(i);
-            this.cache[i] = null; // null will be treated as an error value so the cache read check
-                                  // will skip it next time. But only do this if the API call itself 
-                                  // did not error; otherwise we'd want to be able to try those values 
-                                  // again later
-            cacheNeedsSaving = true
+            if (apiCallCompleted) {
+              this.cache[i] = null; // null will be treated as an error value so the cache read check
+                                    // will skip it next time. But only do this if the API call itself 
+                                    // did not error; otherwise we'd want to be able to try those values 
+                                    // again later
+              cacheNeedsSaving = true
+            }
           }
         }
       });
@@ -297,71 +305,59 @@ export class PointGeocoder {
      * Performs a batch geocoding request to the Esri service for the given identifiers and geocode type.
      * Sends the identifiers to the appropriate Esri endpoint (e.g., postcode or UPRN service),
      * retrieves the geocoded point locations, and returns them as a PointDictionary.
-     * Handles batching if the number of identifiers exceeds the service's per-request limit.
+     * The identifiers are split into batches small enough that the resulting where clause is accepted
+     * by the service, and each batch is paged through until it has been fully retrieved. A batch which
+     * fails does not discard the results of the others; its error message is returned instead.
      *
      * @param identifiers Array of string or number identifiers to geocode.
      * @param type The geocode type (GeocodeTypes.POSTCODE or GeocodeTypes.UPRN).
-     * @returns A promise resolving to a PointDictionary mapping identifiers to [longitude, latitude] pairs.
+     * @param signal Abort signal for cancellation.
+     * @returns A promise resolving to the geocoded points and any error messages.
      * @private
      */
-    private async batch_geocode_esri(identifiers: string[] | number[], type: GeocodeTypes): Promise<PointDictionary>{
-      let params: GeocodeParams
-      let codefield = type === GeocodeTypes.POSTCODE ? "postcode" : "uprn";
+    private async batch_geocode_esri(
+      identifiers: string[] | number[],
+      type: GeocodeTypes,
+      signal: AbortSignal
+    ): Promise<{ geocodes: PointDictionary, errors: string[] }>{
+      const codefield = type === GeocodeTypes.POSTCODE ? "postcode" : "uprn";
       // TODO replace with a parseQueryDetails equivalent
-      let url = type === GeocodeTypes.POSTCODE ? postcodeUrl_Esri : uprnUrl_Esri;
-      let entity = type === GeocodeTypes.POSTCODE ? "postcodes" : "uprns";
-      params = {
-        URL: url,
-        codefield: codefield,
-        codes:identifiers as string[],
-        entity:entity
-      }
-      const in_clause =
-       type === GeocodeTypes.POSTCODE
-        ? `${params.codefield} IN (` +
-          params.codes.map((i) => `'${i.toUpperCase().replace(/\s/g,'')}'`).join(",") +
-        ")"
-        : `${params.codefield} IN (` +
-          params.codes.join(",") +
-        ")"
-        ;
-      const query = esri.query({
-        url: params.URL,
-      });
-      query.where(in_clause);
-      query.precision(6);
-      query.fields([params.codefield, 'latitude', 'longitude']);
-      query.returnGeometry(false);
-      
-      let maxRecordCount = this.max_feature_counts[type];
-      query.limit(maxRecordCount);
-      const pageCount = Math.ceil(identifiers.length / maxRecordCount);
-      let pageOffsets = [];
-      for (let i=0; i<pageCount; i++){
-        pageOffsets.push(i * maxRecordCount);
-      }
-      let allProm = Promise.all(pageOffsets.map(function(resultPageStart){
-        query.offset(resultPageStart);
-        return new Promise<FeatureCollection>((resolve, reject) => query.run((error, fc) => error ? reject(error) : resolve(fc)))
-      }));
-      //const queryrun = promisify(query.run).bind(query);
-      let combinedFeatureCollection: FeatureCollection;
-      try {
-        let paginatedResults = await allProm //queryrun();
-        combinedFeatureCollection = paginatedResults.pop();
-        paginatedResults.forEach(function(resultFeatureSet){
-          Array.prototype.push.apply(combinedFeatureCollection.features, resultFeatureSet.features)
+      const url = type === GeocodeTypes.POSTCODE ? postcodeUrl_Esri : uprnUrl_Esri;
+      const pageSize = this.max_feature_counts[type];
+      const errors: string[] = [];
+      const geocodes: PointDictionary = {};
+      const batches = batchCodes(identifiers as (string | number)[]);
+      const batchResults = await runWithConcurrencyLimit(
+        batches.map((codes) => async () => {
+          const in_clause =
+            type === GeocodeTypes.POSTCODE
+              ? `${codefield} IN (` +
+                codes.map((i) => `'${String(i).toUpperCase().replace(/\s/g,'')}'`).join(",") +
+                ")"
+              : `${codefield} IN (` + codes.join(",") + ")";
+          const query = esri.query({
+            url: url,
+          });
+          query.where(in_clause);
+          query.precision(6);
+          query.fields([codefield, 'latitude', 'longitude']);
+          query.returnGeometry(false);
+          try {
+            return await runEsriQueryPaged(query, pageSize, signal);
+          } catch (error) {
+            if (isAbortError(error)) { throw error; }
+            errors.push(error instanceof Error ? error.message : String(error));
+            return [];
+          }
+        }),
+        signal
+      );
+      batchResults.forEach((features) => {
+        features.forEach((feat) => {
+          geocodes[feat.properties[codefield]] = [feat.properties.longitude, feat.properties.latitude];
         });
-      } catch (error) {
-        //console.log(error); // TODO handle properly
-        return null; //{n_features: 0, bounds:null};
-      }
-      let returnDict = {}
-      //return res;
-      combinedFeatureCollection.features.forEach((feat) => {
-        returnDict[feat.properties[params.codefield]] = [feat.properties.longitude, feat.properties.latitude];
       });
-      return returnDict
+      return { geocodes: geocodes, errors: errors };
     }
     
     // ***********   Redundant code below this point left in for future reference   *************** //

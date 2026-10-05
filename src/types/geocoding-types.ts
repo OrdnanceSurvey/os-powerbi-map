@@ -151,6 +151,17 @@ export interface EsriQueryCheckResult {
     message?: string;
 }
 
+/**
+ * Object representing the combined result of running a set of batched Esri queries, retaining the
+ * features that were returned successfully alongside any errors from batches that failed.
+ */
+export interface EsriQueryRunResult {
+    /** All features returned by the batches which succeeded. */
+    features: Feature[];
+    /** Messages from any batches which failed. */
+    errors: string[];
+}
+
 export interface FileTypeResult  {
     type: 'topojson' | 'geojson' | 'shapefile' | 'unknown';
     warnings?: string[];
