@@ -1066,33 +1066,34 @@ export class OSPowerBIMapManager {
         ) {
           const f = layer["feature"] as OSMapsGeoJson;
           if (f.isPolygon) {
-          // convert crs of clicked point to point in poly/line works
-          let clickedPoint = convertClickedPointCRS(f, lat, lng);
+            // convert crs of clicked point to point in poly/line works
+            let clickedPoint = convertClickedPointCRS(f, lat, lng);
 
-          const isWithin = turf.booleanPointInPolygon(
-            clickedPoint,
-            // @ts-ignore
-            f.geometry
-          );
-          if (isWithin) {
-            overlappingFeatures.push(f);
+            const isWithin = turf.booleanPointInPolygon(
+              clickedPoint,
+              // @ts-ignore
+              f.geometry
+            );
+            if (isWithin) {
+              overlappingFeatures.push(f);
+            }
+          } else if (f.isLine
+          ) {
+            let clickedPoint = convertClickedPointCRS(f, lat, lng);
+            // could use point to line distance to create a tolerance
+            // const distance = turf.pointToLineDistance(clickedPoint,
+            //   layer.feature.geojson_geometry)
+            //   console.log(distance)
+            const isWithin = turf.booleanPointOnLine(
+              clickedPoint,
+              // @ts-ignore
+              f.geometry
+            );
+            if (isWithin) {
+              overlappingFeatures.push(f);
+            }
           }
-        } else if (f.isLine
-        ) {
-          let clickedPoint = convertClickedPointCRS(f, lat, lng);
-          // could use point to line distance to create a tolerance
-          // const distance = turf.pointToLineDistance(clickedPoint,
-          //   layer.feature.geojson_geometry)
-          //   console.log(distance)
-          const isWithin = turf.booleanPointOnLine(
-            clickedPoint,
-            // @ts-ignore
-            f.geometry
-          );
-          if (isWithin) {
-            overlappingFeatures.push(f);
-          }
-        }}
+        }
       });
     }
     return overlappingFeatures;
